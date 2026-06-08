@@ -13,14 +13,19 @@ export async function createSupabaseServerClient() {
     getSupabaseKey(),
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options, maxAge: 0 });
+        setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set({ name, value, ...options });
+            });
+          } catch {
+            // During a normal Server Component render, Next.js does not allow
+            // cookie mutation. Supabase can still read the session here, and any
+            // refresh writes should happen in a Server Action or Route Handler.
+          }
         },
       },
     }
