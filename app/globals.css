@@ -3,16 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --cream: #f5f3ee;
-  --cream-dark: #ede9e1;
-  --ink: #1a1916;
-  --ink-2: #3d3b36;
-  --ink-3: #7a7870;
-  --stone: #d4d0c8;
-  --stone-light: #e8e5dd;
-  --green: #2a5c3f;
-  --green-light: #e8f0eb;
-  --accent: #c9582a;
+  --cream: #fafafa;
+  --cream-dark: #f4f4f5;
+
+  --ink: #09090b;
+  --ink-2: #27272a;
+  --ink-3: #71717a;
+
+  --stone: #d4d4d8;
+  --stone-light: #e4e4e7;
+
+  --green: #16a34a;
+  --green-light: #dcfce7;
+
+  --accent: #2563eb;
 }
 
 html {
@@ -22,9 +26,14 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+
   background: var(--cream);
   color: var(--ink);
+
   font-family: var(--font-sans), system-ui, sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -37,5 +46,5 @@ a {
 }
 
 ::selection {
-  background: rgba(201, 88, 42, 0.18);
+  background: rgba(37, 99, 235, 0.18);
 }

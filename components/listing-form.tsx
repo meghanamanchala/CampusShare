@@ -38,7 +38,7 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
           Campus Listing
         </div>
 
-        <CardTitle className="mt-4 font-serif text-4xl text-ink">
+        <CardTitle className="mt-4 font-bold text-4xl text-ink">
           Post an Item
         </CardTitle>
 
