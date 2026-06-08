@@ -1,32 +1,6 @@
-const feedItems = [
-  {
-    icon: 'BK',
-    title: 'GATE ECE study notes, set of 8',
-    owner: 'Ananya K.',
-    time: '10 mins ago',
-    tag: 'Free',
-    price: 'Free',
-    accent: 'bg-[#eaf3de] text-[#2a5c3f]',
-  },
-  {
-    icon: 'CH',
-    title: 'Study chair, good condition',
-    owner: 'Rahul M.',
-    time: '35 mins ago',
-    tag: 'For sale',
-    price: 'Rs 600',
-    accent: 'bg-[#f5f0e8] text-[#6b6859]',
-  },
-  {
-    icon: 'CL',
-    title: 'Lab coat, size M, borrowed for a week',
-    owner: 'Dev T.',
-    time: '2 hrs ago',
-    tag: 'Borrow',
-    price: 'Borrow',
-    accent: 'bg-[#eef2f7] text-[#3d6080]',
-  },
-];
+import { SignupForm } from '@/components/signup-form';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { demoListings, type CampusListing } from '@/lib/campus-data';
 
 const stats = [
   { value: '2,400+', label: 'Active students' },
@@ -91,7 +65,30 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-ink-3">{children}</p>;
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createSupabaseServerClient();
+  const { data: sessionData } = await supabase.auth.getSession();
+  const { data: listingsData } = await supabase
+    .from('listings')
+    .select('id, title, owner, time, tag, price, icon, tag_class_name')
+    .order('created_at', { ascending: false })
+    .limit(3);
+
+  const currentUser = sessionData.session?.user.email ?? 'verified campus student';
+  const feedItems: CampusListing[] =
+    listingsData?.length
+      ? listingsData.map((item) => ({
+          id: item.id,
+          icon: item.icon ?? 'CS',
+          title: item.title ?? 'Untitled listing',
+          owner: item.owner ?? 'CampusShare user',
+          time: item.time ?? 'just now',
+          tag: item.tag ?? 'New',
+          price: item.price ?? 'Open',
+          tagClassName: item.tag_class_name ?? 'bg-[#eaf3de] text-[#2a5c3f]',
+        }))
+      : demoListings;
+
   return (
     <main className="relative overflow-hidden bg-cream text-ink">
       <div className="absolute right-[-8rem] top-[-8rem] h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(214,208,200,0.85)_0%,rgba(245,243,238,0)_70%)]" />
@@ -186,7 +183,7 @@ export default function HomePage() {
                         <span>{item.owner}</span>
                         <span>{item.time}</span>
                       </div>
-                      <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${item.accent}`}>{item.tag}</div>
+                      <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${item.tagClassName}`}>{item.tag}</div>
                     </div>
                     <div className="text-sm font-semibold text-ink">{item.price}</div>
                   </div>
@@ -254,7 +251,7 @@ export default function HomePage() {
                   {item.icon}
                 </div>
                 <div className="p-5">
-                  <div className={`mb-3 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${item.accent}`}>{item.tag}</div>
+                  <div className={`mb-3 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${item.tagClassName}`}>{item.tag}</div>
                   <h3 className="text-[1.05rem] font-medium text-ink">{item.title}</h3>
                   <div className="mt-4 flex items-center justify-between text-sm text-ink-3">
                     <span>{item.owner}</span>
@@ -366,17 +363,8 @@ export default function HomePage() {
         <p className="mx-auto mt-5 max-w-2xl text-lg font-light leading-8 text-ink-2">
           Join students already reducing waste and saving money. Connect Supabase Auth and Postgres to launch the real product.
         </p>
-        <form className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <input
-            type="email"
-            placeholder="yourname@university.edu"
-            className="min-w-0 flex-1 rounded-xl border border-stone bg-white px-4 py-3 text-sm outline-none transition focus:border-ink"
-          />
-          <button type="submit" className="rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2">
-            Join free
-          </button>
-        </form>
-        <p className="mt-4 text-xs text-ink-3">No spam. Supabase can send the verification link to your campus email.</p>
+        <p className="mt-4 text-sm text-ink-3">Signed in as: {currentUser}</p>
+        <SignupForm redirectTo={process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'} />
       </section>
 
       <footer className="border-t border-stone-light bg-cream-dark py-14">
