@@ -27,7 +27,7 @@ export default async function PostPage() {
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <a
             href="/"
-            className="flex items-center gap-3 font-serif text-[1.35rem]"
+            className="flex items-center gap-3 font-bold text-[1.35rem]"
           >
             <span className="h-2 w-2 rounded-full bg-accent" />
             CampusShare
@@ -48,7 +48,7 @@ export default async function PostPage() {
             Campus Marketplace
           </span>
 
-          <h1 className="mt-6 font-serif text-5xl tracking-[-0.03em] md:text-7xl">
+          <h1 className="mt-6 font-bold text-5xl tracking-[-0.03em] md:text-7xl">
             Post an <span className="italic text-ink-3">Item</span>
           </h1>
 
@@ -64,7 +64,7 @@ export default async function PostPage() {
           </div>
         ) : (
           <div className="max-w-2xl rounded-[2rem] border border-stone-light bg-white p-8 shadow-soft">
-            <h2 className="font-serif text-3xl text-ink">
+            <h2 className="font-bold text-3xl text-ink">
               Sign in to continue
             </h2>
 

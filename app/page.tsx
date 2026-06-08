@@ -97,7 +97,7 @@ export default async function HomePage() {
 
       <header className="sticky top-0 z-50 border-b border-stone-light/80 bg-cream/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <a href="#top" className="flex items-center gap-3 font-serif text-[1.35rem]">
+          <a href="#top" className="flex items-center gap-3 font-bold text-[1.35rem]">
             <span className="h-2 w-2 rounded-full bg-accent" />
             CampusShare
           </a>
@@ -128,7 +128,7 @@ export default async function HomePage() {
               <span className="h-px w-8 bg-stone" />
               <span className="text-sm text-ink-3">Verified students only</span>
             </div>
-            <h1 className="max-w-xl font-serif text-5xl leading-[1.05] tracking-[-0.03em] md:text-7xl">
+            <h1 className="max-w-xl font-bold text-5xl leading-[1.05] tracking-[-0.03em] md:text-7xl">
               Your campus, <span className="italic text-ink-3">less stuff</span> going to waste.
             </h1>
             <p className="mt-6 max-w-xl text-lg font-light leading-8 text-ink-2">
@@ -214,7 +214,7 @@ export default async function HomePage() {
         <div className="mx-auto grid max-w-6xl gap-6 px-6 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <p className="font-serif text-4xl leading-none text-ink">{stat.value}</p>
+              <p className="font-bold text-4xl leading-none text-ink">{stat.value}</p>
               <p className="mt-2 text-sm text-ink-3">{stat.label}</p>
             </div>
           ))}
@@ -225,7 +225,7 @@ export default async function HomePage() {
         <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
           <div className="max-w-xl">
             <SectionLabel>Post</SectionLabel>
-            <h2 className="font-serif text-4xl tracking-[-0.03em] md:text-6xl">
+            <h2 className="font-bold text-4xl tracking-[-0.03em] md:text-6xl">
               Post from a dedicated <span className="italic text-ink-3">listing page</span>
             </h2>
             <p className="mt-4 text-lg font-light leading-8 text-ink-2">
@@ -260,7 +260,7 @@ export default async function HomePage() {
       <section id="how-it-works" className="mx-auto max-w-6xl px-6 py-24">
         <div className="max-w-2xl">
           <SectionLabel>Process</SectionLabel>
-          <h2 className="font-serif text-4xl tracking-[-0.03em] md:text-6xl">
+          <h2 className="font-bold text-4xl tracking-[-0.03em] md:text-6xl">
             How CampusShare <span className="italic text-ink-3">actually works</span>
           </h2>
           <p className="mt-4 text-lg font-light leading-8 text-ink-2">
@@ -271,7 +271,7 @@ export default async function HomePage() {
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {steps.map((step, index) => (
             <article key={step.title} className="rounded-[1.75rem] border border-stone-light bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-soft">
-              <p className="font-serif text-5xl leading-none text-stone">0{index + 1}</p>
+              <p className="font-bold text-5xl leading-none text-stone">0{index + 1}</p>
               <div className="mt-5 flex h-11 w-11 items-center justify-center rounded-xl border border-stone-light bg-cream text-lg">
                 {index === 0 ? 'V' : index === 1 ? 'P' : 'C'}
               </div>
@@ -286,7 +286,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-6xl px-6">
           <SectionLabel>Browse</SectionLabel>
           <div className="max-w-2xl">
-            <h2 className="font-serif text-4xl tracking-[-0.03em] md:text-6xl">
+            <h2 className="font-bold text-4xl tracking-[-0.03em] md:text-6xl">
               What is on campus <span className="italic text-ink-3">right now</span>
             </h2>
           </div>
@@ -306,7 +306,7 @@ export default async function HomePage() {
                       <span>{item.time}</span>
                     </div>
                     <div className="mt-6 flex items-center justify-between">
-                      <p className="font-serif text-2xl text-ink">{item.price}</p>
+                      <p className="font-bold text-2xl text-ink">{item.price}</p>
                       <button className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-cream transition hover:bg-ink-2">
                         Claim
                       </button>
@@ -330,7 +330,7 @@ export default async function HomePage() {
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
             <SectionLabel>Features</SectionLabel>
-            <h2 className="max-w-xl font-serif text-4xl tracking-[-0.03em] md:text-6xl">
+            <h2 className="max-w-xl font-bold text-4xl tracking-[-0.03em] md:text-6xl">
               Built for the <span className="italic text-ink-3">campus reality</span>
             </h2>
             <p className="mt-4 max-w-2xl text-lg font-light leading-8 text-ink-2">
@@ -383,7 +383,7 @@ export default async function HomePage() {
       <section className="bg-ink py-24 text-white">
         <div className="mx-auto max-w-6xl px-6">
           <SectionLabel>What students say</SectionLabel>
-          <h2 className="max-w-2xl font-serif text-4xl tracking-[-0.03em] md:text-6xl">
+          <h2 className="max-w-2xl font-bold text-4xl tracking-[-0.03em] md:text-6xl">
             Real stories from <span className="italic text-white/45">real campuses</span>
           </h2>
 
@@ -414,7 +414,7 @@ export default async function HomePage() {
           <span className="h-1.5 w-1.5 rounded-full bg-green" />
           {isSignedIn ? 'Ready to post' : 'Open for early access'}
         </div>
-        <h2 className="mt-6 font-serif text-4xl tracking-[-0.03em] md:text-6xl">
+        <h2 className="mt-6 font-bold text-4xl tracking-[-0.03em] md:text-6xl">
           {isSignedIn ? (
             <>
               You’re in on <span className="italic text-ink-3">your campus</span>
@@ -454,7 +454,7 @@ export default async function HomePage() {
       <footer className="border-t border-stone-light bg-cream-dark py-14">
         <div className="mx-auto grid max-w-6xl gap-10 px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
-            <a href="#top" className="flex items-center gap-3 font-serif text-[1.35rem]">
+            <a href="#top" className="flex items-center gap-3 font-bold text-[1.35rem]">
               <span className="h-2 w-2 rounded-full bg-accent" />
               CampusShare
             </a>
