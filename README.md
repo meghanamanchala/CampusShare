@@ -38,20 +38,16 @@ CampusShare provides:
 
 | Layer | Tooling | Purpose |
 | --- | --- | --- |
-| Frontend | React Native | Cross-platform mobile app for iOS and Android |
-| State Management | Redux Toolkit | Manage feed state, claim status, and UI updates |
-| Backend API | Node.js with Express.js | REST API for authentication, listings, and claims |
-| Database | MongoDB Atlas | Store listings, users, categories, and claim metadata |
-| Real-time Updates | Socket.io | Push live feed changes when items are posted or claimed |
-| Authentication | Firebase Auth | Verify campus email access and restrict the app to approved users |
-| Image Storage | Firebase Storage or Amazon S3 | Store and serve uploaded item photos |
-| Hosting | Render or Vercel | Deploy the web app or backend services |
+| Frontend | Next.js App Router | Build the web app with server components, routing, and fast navigation |
+| Styling | Tailwind CSS | Create a responsive UI with utility-first styling |
+| Backend / Database / Auth | Supabase | Handle authentication, database storage, row-level security, and real-time updates |
+| Image Storage | Supabase Storage | Store and serve uploaded item photos |
+| Deployment | Vercel | Deploy the Next.js application |
 
 ## Why This Stack Fits
 
-- React Native keeps the app mobile-first for quick posting on the go.
-- Node.js and Express make it straightforward to build the API and claim workflow.
-- MongoDB fits flexible item posts with images, categories, and status changes.
-- Socket.io supports the immediate, live behavior that a campus bulletin board needs.
-- Firebase Auth adds a simple way to keep the network trusted and campus-only.
+- Next.js App Router provides a modern, scalable structure for a campus marketplace web app.
+- Tailwind CSS makes it easy to build a clean, responsive interface quickly.
+- Supabase combines authentication, Postgres, storage, and real-time features in one platform.
+- Vercel gives a simple deployment path for the Next.js app.
 
