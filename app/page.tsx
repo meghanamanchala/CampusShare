@@ -1,6 +1,7 @@
 import { SignupForm } from '@/components/signup-form';
+import { ListingForm } from '@/components/listing-form';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import type { CampusListing } from '@/lib/campus-data';
+import { getListingDisplayPrice, getListingTagClassName, type CampusListing } from '@/lib/campus-data';
 
 const stats = [
   { value: '2,400+', label: 'Active students' },
@@ -75,6 +76,7 @@ export default async function HomePage() {
     .limit(3);
 
   const currentUser = sessionData.session?.user.email ?? 'verified campus student';
+  const defaultOwnerName = sessionData.session?.user.email?.split('@')[0].replace(/[._-]+/g, ' ') ?? '';
   const feedItems: CampusListing[] =
     listingsData?.map((item) => ({
       id: item.id,
@@ -83,8 +85,8 @@ export default async function HomePage() {
       owner: item.owner_name ?? 'CampusShare user',
       time: item.created_at ? new Date(item.created_at).toLocaleString([], { month: 'short', day: 'numeric' }) : 'just now',
       tag: item.item_type ?? 'New',
-      price: item.price ? `Rs ${item.price}` : 'Open',
-      tagClassName: item.tag_class_name ?? 'bg-[#eaf3de] text-[#2a5c3f]',
+      price: getListingDisplayPrice(item.item_type, item.price),
+      tagClassName: item.tag_class_name ?? getListingTagClassName(item.item_type),
     })) ?? [];
 
   return (
@@ -108,7 +110,7 @@ export default async function HomePage() {
               Features
             </a>
             <a href="#cta" className="rounded-xl bg-ink px-5 py-2.5 text-sm font-medium text-cream transition hover:bg-ink-2">
-              Join with Supabase
+              Join free
             </a>
           </nav>
         </div>
@@ -214,6 +216,28 @@ export default async function HomePage() {
               <p className="mt-2 text-sm text-ink-3">{stat.label}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section id="post" className="mx-auto max-w-6xl px-6 py-24">
+        <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+          <div className="max-w-xl">
+            <SectionLabel>Post</SectionLabel>
+            <h2 className="font-serif text-4xl tracking-[-0.03em] md:text-6xl">
+              Add a real listing to your <span className="italic text-ink-3">Supabase feed</span>
+            </h2>
+            <p className="mt-4 text-lg font-light leading-8 text-ink-2">
+              This form writes directly to your live `listings` table and revalidates the home feed so the new item appears immediately.
+            </p>
+            <div className="mt-8 rounded-[1.5rem] border border-stone-light bg-white p-6 shadow-sm">
+              <p className="text-sm font-medium text-ink">Shadcn setup is ready</p>
+              <p className="mt-2 text-sm leading-7 text-ink-2">
+                The project now has a shadcn-style config in <span className="font-medium text-ink">components.json</span>, shared UI primitives in <span className="font-medium text-ink">components/ui</span>, and a <span className="font-medium text-ink">cn</span> helper in <span className="font-medium text-ink">lib/utils.ts</span>.
+              </p>
+            </div>
+          </div>
+
+          <ListingForm defaultOwnerName={defaultOwnerName} />
         </div>
       </section>
 

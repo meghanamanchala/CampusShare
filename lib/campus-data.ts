@@ -9,6 +9,28 @@ export type CampusListing = {
   tagClassName: string;
 };
 
+export function getListingTagClassName(itemType: string | null | undefined) {
+  switch ((itemType ?? '').toLowerCase()) {
+    case 'for sale':
+      return 'bg-[#f5f0e8] text-[#6b6859]';
+    case 'borrow':
+      return 'bg-[#eef2f7] text-[#3d6080]';
+    default:
+      return 'bg-[#eaf3de] text-[#2a5c3f]';
+  }
+}
+
+export function getListingDisplayPrice(itemType: string | null | undefined, price: string | null | undefined) {
+  switch ((itemType ?? '').toLowerCase()) {
+    case 'for sale':
+      return price ? `Rs ${price}` : 'Open';
+    case 'borrow':
+      return 'Borrow';
+    default:
+      return 'Free';
+  }
+}
+
 export const demoListings: CampusListing[] = [
   {
     id: 'demo-1',
