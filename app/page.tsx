@@ -1,6 +1,6 @@
 import { SignupForm } from '@/components/signup-form';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { demoListings, type CampusListing } from '@/lib/campus-data';
+import type { CampusListing } from '@/lib/campus-data';
 
 const stats = [
   { value: '2,400+', label: 'Active students' },
@@ -68,26 +68,24 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 export default async function HomePage() {
   const supabase = await createSupabaseServerClient();
   const { data: sessionData } = await supabase.auth.getSession();
-  const { data: listingsData } = await supabase
+  const { data: listingsData, error: listingsError } = await supabase
     .from('listings')
-    .select('id, title, owner, time, tag, price, icon, tag_class_name')
+    .select('id, title, owner_name, created_at, item_type, price, icon, tag_class_name')
     .order('created_at', { ascending: false })
     .limit(3);
 
   const currentUser = sessionData.session?.user.email ?? 'verified campus student';
   const feedItems: CampusListing[] =
-    listingsData?.length
-      ? listingsData.map((item) => ({
-          id: item.id,
-          icon: item.icon ?? 'CS',
-          title: item.title ?? 'Untitled listing',
-          owner: item.owner ?? 'CampusShare user',
-          time: item.time ?? 'just now',
-          tag: item.tag ?? 'New',
-          price: item.price ?? 'Open',
-          tagClassName: item.tag_class_name ?? 'bg-[#eaf3de] text-[#2a5c3f]',
-        }))
-      : demoListings;
+    listingsData?.map((item) => ({
+      id: item.id,
+      icon: item.icon ?? 'CS',
+      title: item.title ?? 'Untitled listing',
+      owner: item.owner_name ?? 'CampusShare user',
+      time: item.created_at ? new Date(item.created_at).toLocaleString([], { month: 'short', day: 'numeric' }) : 'just now',
+      tag: item.item_type ?? 'New',
+      price: item.price ? `Rs ${item.price}` : 'Open',
+      tagClassName: item.tag_class_name ?? 'bg-[#eaf3de] text-[#2a5c3f]',
+    })) ?? [];
 
   return (
     <main className="relative overflow-hidden bg-cream text-ink">
@@ -172,22 +170,31 @@ export default async function HomePage() {
               </div>
 
               <div className="space-y-1 p-3">
-                {feedItems.map((item, index) => (
-                  <div key={item.title} className={`flex gap-3 rounded-xl p-3 ${index === 2 ? 'opacity-60' : 'hover:bg-cream'}`}>
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-stone-light text-xl font-semibold text-ink-2">
-                      {item.icon}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-ink">{item.title}</p>
-                      <div className="mt-1 flex gap-3 text-xs text-ink-3">
-                        <span>{item.owner}</span>
-                        <span>{item.time}</span>
+                {feedItems.length > 0 ? (
+                  feedItems.map((item, index) => (
+                    <div key={item.id} className={`flex gap-3 rounded-xl p-3 ${index === 2 ? 'opacity-60' : 'hover:bg-cream'}`}>
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-stone-light text-xl font-semibold text-ink-2">
+                        {item.icon}
                       </div>
-                      <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${item.tagClassName}`}>{item.tag}</div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-ink">{item.title}</p>
+                        <div className="mt-1 flex gap-3 text-xs text-ink-3">
+                          <span>{item.owner}</span>
+                          <span>{item.time}</span>
+                        </div>
+                        <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${item.tagClassName}`}>{item.tag}</div>
+                      </div>
+                      <div className="text-sm font-semibold text-ink">{item.price}</div>
                     </div>
-                    <div className="text-sm font-semibold text-ink">{item.price}</div>
+                  ))
+                ) : (
+                  <div className="rounded-[1.5rem] border border-dashed border-stone-light bg-cream px-5 py-8 text-center">
+                    <p className="text-sm font-medium text-ink">No live listings yet</p>
+                    <p className="mt-2 text-xs text-ink-3">
+                      {listingsError ? 'Supabase listings could not be loaded.' : 'Create rows in the listings table to show real campus items here.'}
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -245,7 +252,8 @@ export default async function HomePage() {
           </div>
 
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            {feedItems.map((item) => (
+            {feedItems.length > 0 ? (
+              feedItems.map((item) => (
               <article key={item.title} className="overflow-hidden rounded-[1.75rem] border border-stone-light bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-soft">
                 <div className="flex h-48 items-center justify-center bg-stone-light text-5xl font-semibold text-ink-2">
                   {item.icon}
@@ -265,7 +273,15 @@ export default async function HomePage() {
                   </div>
                 </div>
               </article>
-            ))}
+              ))
+            ) : (
+              <div className="rounded-[1.75rem] border border-dashed border-stone-light bg-white p-10 text-center lg:col-span-3">
+                <p className="text-lg font-medium text-ink">No live listings yet</p>
+                <p className="mt-2 text-sm text-ink-3">
+                  Add rows to the Supabase <span className="font-medium text-ink">listings</span> table to populate this section.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>
