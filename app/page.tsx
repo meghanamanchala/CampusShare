@@ -76,6 +76,9 @@ export default async function HomePage() {
     .limit(3);
 
   const currentUser = sessionData.session?.user.email ?? 'verified campus student';
+  const isSignedIn = Boolean(sessionData.session?.user);
+  const primaryCtaLabel = isSignedIn ? 'Post an item' : 'Join free';
+  const primaryCtaHref = isSignedIn ? '#post' : '#cta';
   const defaultOwnerName = sessionData.session?.user.email?.split('@')[0].replace(/[._-]+/g, ' ') ?? '';
   const feedItems: CampusListing[] =
     listingsData?.map((item) => ({
@@ -109,8 +112,8 @@ export default async function HomePage() {
             <a href="#features" className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light">
               Features
             </a>
-            <a href="#cta" className="rounded-xl bg-ink px-5 py-2.5 text-sm font-medium text-cream transition hover:bg-ink-2">
-              Join free
+            <a href={primaryCtaHref} className="rounded-xl bg-ink px-5 py-2.5 text-sm font-medium text-cream transition hover:bg-ink-2">
+              {primaryCtaLabel}
             </a>
           </nav>
         </div>
@@ -134,8 +137,8 @@ export default async function HomePage() {
             </p>
 
             <div className="mt-10 flex flex-wrap gap-4">
-              <a href="#cta" className="rounded-xl bg-ink px-7 py-3.5 text-sm font-medium text-cream shadow-soft transition hover:-translate-y-0.5 hover:bg-ink-2">
-                Join with .edu email
+              <a href={primaryCtaHref} className="rounded-xl bg-ink px-7 py-3.5 text-sm font-medium text-cream shadow-soft transition hover:-translate-y-0.5 hover:bg-ink-2">
+                {primaryCtaLabel}
               </a>
               <a href="#how-it-works" className="rounded-xl border border-stone px-6 py-3 text-sm text-ink-2 transition hover:bg-stone-light">
                 See how it works
@@ -395,16 +398,45 @@ export default async function HomePage() {
       <section id="cta" className="mx-auto max-w-3xl px-6 py-24 text-center">
         <div className="inline-flex items-center gap-2 rounded-full bg-green-light px-5 py-2 text-sm font-medium text-green">
           <span className="h-1.5 w-1.5 rounded-full bg-green" />
-          Open for early access
+          {isSignedIn ? 'Ready to post' : 'Open for early access'}
         </div>
         <h2 className="mt-8 font-serif text-4xl tracking-[-0.03em] md:text-6xl">
-          Start sharing on <span className="italic text-ink-3">your campus</span>
+          {isSignedIn ? (
+            <>
+              You’re in on <span className="italic text-ink-3">your campus</span>
+            </>
+          ) : (
+            <>
+              Start sharing on <span className="italic text-ink-3">your campus</span>
+            </>
+          )}
         </h2>
         <p className="mx-auto mt-5 max-w-2xl text-lg font-light leading-8 text-ink-2">
-          Join students already reducing waste and saving money. Connect Supabase Auth and Postgres to launch the real product.
+          {isSignedIn
+            ? 'Your account is confirmed. Post your first item now and it will appear in the live campus feed.'
+            : 'Join students already reducing waste and saving money. Connect Supabase Auth and Postgres to launch the real product.'}
         </p>
-        <p className="mt-4 text-sm text-ink-3">Signed in as: {currentUser}</p>
-        <SignupForm redirectTo={process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'} />
+
+        {isSignedIn ? (
+          <div className="mt-8 rounded-[1.75rem] border border-stone-light bg-white p-8 text-left shadow-sm">
+            <p className="text-sm font-medium text-ink">Signed in as: {currentUser}</p>
+            <p className="mt-2 text-sm leading-7 text-ink-2">
+              The signup step is complete. Go straight to the posting form below and add a listing to the live feed.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3 text-center sm:justify-start">
+              <a href="#post" className="rounded-xl bg-ink px-5 py-3 text-sm font-medium text-cream transition hover:bg-ink-2">
+                Post an item
+              </a>
+              <a href="#listings" className="rounded-xl border border-stone px-5 py-3 text-sm text-ink-2 transition hover:bg-stone-light">
+                Browse live listings
+              </a>
+            </div>
+          </div>
+        ) : (
+          <>
+            <SignupForm redirectTo={process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'} />
+          </>
+        )}
       </section>
 
       <footer className="border-t border-stone-light bg-cream-dark py-14">
