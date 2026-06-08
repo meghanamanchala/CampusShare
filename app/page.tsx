@@ -79,6 +79,8 @@ export default async function HomePage() {
   const isSignedIn = Boolean(sessionData.session?.user);
   const primaryCtaLabel = isSignedIn ? 'Post an item' : 'Join free';
   const primaryCtaHref = isSignedIn ? '#post' : '#cta';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  const authCallbackUrl = `${siteUrl.replace(/\/$/, '')}/auth/callback`;
   const defaultOwnerName = sessionData.session?.user.email?.split('@')[0].replace(/[._-]+/g, ' ') ?? '';
   const feedItems: CampusListing[] =
     listingsData?.map((item) => ({
@@ -400,7 +402,7 @@ export default async function HomePage() {
           <span className="h-1.5 w-1.5 rounded-full bg-green" />
           {isSignedIn ? 'Ready to post' : 'Open for early access'}
         </div>
-        <h2 className="mt-8 font-serif text-4xl tracking-[-0.03em] md:text-6xl">
+        <h2 className="mt-6 font-serif text-4xl tracking-[-0.03em] md:text-6xl">
           {isSignedIn ? (
             <>
               You’re in on <span className="italic text-ink-3">your campus</span>
@@ -433,9 +435,7 @@ export default async function HomePage() {
             </div>
           </div>
         ) : (
-          <>
-            <SignupForm redirectTo={process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'} />
-          </>
+          <SignupForm redirectTo={authCallbackUrl} />
         )}
       </section>
 
