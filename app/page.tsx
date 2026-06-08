@@ -1,5 +1,4 @@
 import { SignupForm } from '@/components/signup-form';
-import { ListingForm } from '@/components/listing-form';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getListingDisplayPrice, getListingTagClassName, type CampusListing } from '@/lib/campus-data';
 
@@ -21,26 +20,26 @@ const steps = [
   },
   {
     title: 'Claim and coordinate quickly',
-    description: 'Supabase real-time updates keep listings current so items are claimed without confusion.',
+    description: 'Live updates keep listings current so items are claimed without confusion.',
   },
 ];
 
 const features = [
   {
     title: 'Verified campus access',
-    description: 'Supabase Auth keeps the feed limited to students with approved campus emails.',
+    description: 'Only students with approved campus emails can join the network.',
   },
   {
-    title: 'Fast real-time updates',
-    description: 'Supabase Realtime keeps item status changes visible as soon as they happen.',
+    title: 'Instant updates',
+    description: 'Listings and availability stay updated in real time.',
   },
   {
-    title: 'Structured listings',
-    description: 'Supabase Postgres stores posts, categories, and claim status in one clean schema.',
+    title: 'Organized listings',
+    description: 'Browse items by category, type, and availability.',
   },
   {
-    title: 'Photo storage',
-    description: 'Supabase Storage handles item photos and media uploads with simple access control.',
+    title: 'Photo support',
+    description: 'Upload images to help students quickly identify items.',
   },
 ];
 
@@ -75,13 +74,11 @@ export default async function HomePage() {
     .order('created_at', { ascending: false })
     .limit(3);
 
-  const currentUser = sessionData.session?.user.email ?? 'verified campus student';
   const isSignedIn = Boolean(sessionData.session?.user);
   const primaryCtaLabel = isSignedIn ? 'Post an item' : 'Join free';
-  const primaryCtaHref = isSignedIn ? '#post' : '#cta';
+  const primaryCtaHref = isSignedIn ? '/post' : '#cta';
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
   const authCallbackUrl = `${siteUrl.replace(/\/$/, '')}/auth/callback`;
-  const defaultOwnerName = sessionData.session?.user.email?.split('@')[0].replace(/[._-]+/g, ' ') ?? '';
   const feedItems: CampusListing[] =
     listingsData?.map((item) => ({
       id: item.id,
@@ -135,8 +132,7 @@ export default async function HomePage() {
               Your campus, <span className="italic text-ink-3">less stuff</span> going to waste.
             </h1>
             <p className="mt-6 max-w-xl text-lg font-light leading-8 text-ink-2">
-              Give, borrow, buy, or claim items with verified students nearby. Built with Next.js App Router, Tailwind CSS, and Supabase.
-            </p>
+              Give, borrow, buy, or claim items with verified students nearby. A simple way to share useful things within your campus community.            </p>
 
             <div className="mt-10 flex flex-wrap gap-4">
               <a href={primaryCtaHref} className="rounded-xl bg-ink px-7 py-3.5 text-sm font-medium text-cream shadow-soft transition hover:-translate-y-0.5 hover:bg-ink-2">
@@ -169,7 +165,7 @@ export default async function HomePage() {
               <div className="flex items-center justify-between border-b border-stone-light px-5 py-4">
                 <div>
                   <p className="text-sm font-medium text-ink">Campus Feed</p>
-                  <p className="text-xs text-ink-3">IIT Hyderabad - 6 items nearby</p>
+                  <p className="text-xs text-ink-3">  Live listings from your campus</p>
                 </div>
                 <span className="rounded-full bg-green-light px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-green">
                   Live
@@ -198,8 +194,9 @@ export default async function HomePage() {
                   <div className="rounded-[1.5rem] border border-dashed border-stone-light bg-cream px-5 py-8 text-center">
                     <p className="text-sm font-medium text-ink">No live listings yet</p>
                     <p className="mt-2 text-xs text-ink-3">
-                      {listingsError ? 'Supabase listings could not be loaded.' : 'Create rows in the listings table to show real campus items here.'}
-                    </p>
+                      {listingsError
+                        ? 'Unable to load listings right now.'
+                        : 'No listings have been posted yet.'}                    </p>
                   </div>
                 )}
               </div>
@@ -207,7 +204,7 @@ export default async function HomePage() {
 
             <div className="absolute -bottom-5 -left-4 rounded-2xl border border-stone-light bg-white px-4 py-3 shadow-soft">
               <p className="text-sm font-medium text-ink">Item claimed</p>
-              <p className="text-xs text-ink-3">Supabase Realtime updated the feed just now</p>
+              <p className="text-xs text-ink-3">Someone nearby just claimed an item</p>
             </div>
           </div>
         </div>
@@ -229,20 +226,34 @@ export default async function HomePage() {
           <div className="max-w-xl">
             <SectionLabel>Post</SectionLabel>
             <h2 className="font-serif text-4xl tracking-[-0.03em] md:text-6xl">
-              Add a real listing to your <span className="italic text-ink-3">Supabase feed</span>
+              Post from a dedicated <span className="italic text-ink-3">listing page</span>
             </h2>
             <p className="mt-4 text-lg font-light leading-8 text-ink-2">
-              This form writes directly to your live `listings` table and revalidates the home feed so the new item appears immediately.
-            </p>
+              Keep browsing and posting separate. Open the posting page to quickly create and manage listings.            </p>
             <div className="mt-8 rounded-[1.5rem] border border-stone-light bg-white p-6 shadow-sm">
-              <p className="text-sm font-medium text-ink">Shadcn setup is ready</p>
+              <p className="text-sm font-medium text-ink">Dedicated posting flow</p>
               <p className="mt-2 text-sm leading-7 text-ink-2">
-                The project now has a shadcn-style config in <span className="font-medium text-ink">components.json</span>, shared UI primitives in <span className="font-medium text-ink">components/ui</span>, and a <span className="font-medium text-ink">cn</span> helper in <span className="font-medium text-ink">lib/utils.ts</span>.
-              </p>
+                A dedicated page makes posting faster, cleaner, and easier to manage.              </p>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a href="/post" className="rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2">
+                Open post page
+              </a>
+              <a href="#listings" className="rounded-xl border border-stone px-6 py-3 text-sm text-ink-2 transition hover:bg-stone-light">
+                Browse live listings
+              </a>
             </div>
           </div>
 
-          <ListingForm defaultOwnerName={defaultOwnerName} />
+          <div className="rounded-[1.75rem] border border-stone-light bg-white p-6 shadow-sm">
+            <p className="text-sm font-medium text-ink">What lives on the post page</p>
+            <div className="mt-5 space-y-3 text-sm text-ink-2">
+              <div className="rounded-2xl bg-cream/60 px-4 py-3">Item title, type, icon, and pricing fields</div>
+              <div className="rounded-2xl bg-cream/60 px-4 py-3">Secure posting tied to your account</div>
+              <div className="rounded-2xl bg-cream/60 px-4 py-3">Success and error states after publishing</div>
+              <div className="rounded-2xl bg-cream/60 px-4 py-3">Automatic home feed refresh after submit</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -283,31 +294,31 @@ export default async function HomePage() {
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
             {feedItems.length > 0 ? (
               feedItems.map((item) => (
-              <article key={item.title} className="overflow-hidden rounded-[1.75rem] border border-stone-light bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-soft">
-                <div className="flex h-48 items-center justify-center bg-stone-light text-5xl font-semibold text-ink-2">
-                  {item.icon}
-                </div>
-                <div className="p-5">
-                  <div className={`mb-3 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${item.tagClassName}`}>{item.tag}</div>
-                  <h3 className="text-[1.05rem] font-medium text-ink">{item.title}</h3>
-                  <div className="mt-4 flex items-center justify-between text-sm text-ink-3">
-                    <span>{item.owner}</span>
-                    <span>{item.time}</span>
+                <article key={item.title} className="overflow-hidden rounded-[1.75rem] border border-stone-light bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-soft">
+                  <div className="flex h-48 items-center justify-center bg-stone-light text-5xl font-semibold text-ink-2">
+                    {item.icon}
                   </div>
-                  <div className="mt-6 flex items-center justify-between">
-                    <p className="font-serif text-2xl text-ink">{item.price}</p>
-                    <button className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-cream transition hover:bg-ink-2">
-                      Claim
-                    </button>
+                  <div className="p-5">
+                    <div className={`mb-3 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${item.tagClassName}`}>{item.tag}</div>
+                    <h3 className="text-[1.05rem] font-medium text-ink">{item.title}</h3>
+                    <div className="mt-4 flex items-center justify-between text-sm text-ink-3">
+                      <span>{item.owner}</span>
+                      <span>{item.time}</span>
+                    </div>
+                    <div className="mt-6 flex items-center justify-between">
+                      <p className="font-serif text-2xl text-ink">{item.price}</p>
+                      <button className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-cream transition hover:bg-ink-2">
+                        Claim
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </article>
+                </article>
               ))
             ) : (
               <div className="rounded-[1.75rem] border border-dashed border-stone-light bg-white p-10 text-center lg:col-span-3">
                 <p className="text-lg font-medium text-ink">No live listings yet</p>
                 <p className="mt-2 text-sm text-ink-3">
-                  Add rows to the Supabase <span className="font-medium text-ink">listings</span> table to populate this section.
+                  Be the first student to post an item!
                 </p>
               </div>
             )}
@@ -348,7 +359,7 @@ export default async function HomePage() {
               <span className="h-2.5 w-2.5 rounded-full bg-[#a3d98e]" />
             </div>
             <div className="rounded-[1.5rem] bg-cream p-6">
-              <p className="text-sm font-medium text-ink-2">Supabase-ready campus feed</p>
+              <p className="text-sm font-medium text-ink-2">Verified campus community</p>
               <div className="mt-5 space-y-3">
                 <div className="rounded-2xl border border-stone-light bg-white p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-ink-3">University email</p>
@@ -356,7 +367,8 @@ export default async function HomePage() {
                 </div>
                 <div className="rounded-2xl border border-stone-light bg-green-light p-4">
                   <p className="text-sm font-medium text-green">Enrollment verified</p>
-                  <p className="mt-1 text-xs text-green">Supabase Auth confirms the student account.</p>
+                  <p className="mt-1 text-xs text-green">  Your campus email confirms your student account.
+                  </p>
                 </div>
                 <div className="rounded-2xl border border-stone-light bg-white p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-ink-3">Realtime status</p>
@@ -416,17 +428,17 @@ export default async function HomePage() {
         <p className="mx-auto mt-5 max-w-2xl text-lg font-light leading-8 text-ink-2">
           {isSignedIn
             ? 'Your account is confirmed. Post your first item now and it will appear in the live campus feed.'
-            : 'Join students already reducing waste and saving money. Connect Supabase Auth and Postgres to launch the real product.'}
+            : 'Join students already reducing waste, saving money, and helping their campus community.'}
         </p>
 
         {isSignedIn ? (
           <div className="mt-8 rounded-[1.75rem] border border-stone-light bg-white p-8 text-left shadow-sm">
-            <p className="text-sm font-medium text-ink">Signed in as: {currentUser}</p>
+            <p className="text-sm font-medium text-ink">Signed in and ready to publish</p>
             <p className="mt-2 text-sm leading-7 text-ink-2">
-              The signup step is complete. Go straight to the posting form below and add a listing to the live feed.
+              The signup step is complete. Open the dedicated posting page and add a listing to the live feed.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3 text-center sm:justify-start">
-              <a href="#post" className="rounded-xl bg-ink px-5 py-3 text-sm font-medium text-cream transition hover:bg-ink-2">
+              <a href="/post" className="rounded-xl bg-ink px-5 py-3 text-sm font-medium text-cream transition hover:bg-ink-2">
                 Post an item
               </a>
               <a href="#listings" className="rounded-xl border border-stone px-5 py-3 text-sm text-ink-2 transition hover:bg-stone-light">
@@ -459,7 +471,7 @@ export default async function HomePage() {
               <a className="block hover:text-ink" href="#listings">
                 Browse listings
               </a>
-              <a className="block hover:text-ink" href="#cta">
+              <a className="block hover:text-ink" href="/post">
                 Post an item
               </a>
             </div>
