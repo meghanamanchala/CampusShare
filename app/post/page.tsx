@@ -1,5 +1,6 @@
 import { ListingForm } from '@/components/listing-form';
 import { SignupForm } from '@/components/signup-form';
+import { SiteHeader } from '@/components/site-header';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export default async function PostPage() {
@@ -23,32 +24,15 @@ export default async function PostPage() {
 
   return (
     <main className="min-h-screen bg-cream text-ink">
-      <header className="sticky top-0 z-50 border-b border-stone-light bg-cream/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <a
-            href="/"
-            className="flex items-center gap-3 font-bold text-[1.35rem]"
-          >
-            <span className="h-2 w-2 rounded-full bg-accent" />
-            CampusShare
-          </a>
+      <SiteHeader backHref="/" backLabel="Back to Feed" />
 
-          <a
-            href="/"
-            className="rounded-xl border border-stone px-5 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
-          >
-            Back to Feed
-          </a>
-        </div>
-      </header>
-
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="mb-12">
+      <section className="mx-auto max-w-6xl px-6 py-16 md:py-20">
+        <div className="mb-12 max-w-3xl">
           <span className="inline-flex items-center rounded-full bg-green-light px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-green">
             Campus Marketplace
           </span>
 
-          <h1 className="mt-6 font-bold text-5xl tracking-[-0.03em] md:text-7xl">
+          <h1 className="mt-6 font-serif text-5xl tracking-[-0.03em] md:text-7xl">
             Post an <span className="italic text-ink-3">Item</span>
           </h1>
 
@@ -64,7 +48,7 @@ export default async function PostPage() {
           </div>
         ) : (
           <div className="max-w-2xl rounded-[2rem] border border-stone-light bg-white p-8 shadow-soft">
-            <h2 className="font-bold text-3xl text-ink">
+            <h2 className="font-serif text-3xl text-ink">
               Sign in to continue
             </h2>
 
