@@ -2,6 +2,7 @@ export type CampusListing = {
   id: string;
   icon?: string;
   imageUrl?: string | null;
+  description?: string | null;
   title: string;
   owner: string;
   time: string;

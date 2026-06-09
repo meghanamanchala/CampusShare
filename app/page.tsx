@@ -1,6 +1,8 @@
+import { ListingCard, ListingFeedRow } from '@/components/listing-card';
 import { SignupForm } from '@/components/signup-form';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getListingDisplayPrice, getListingTagClassName, type CampusListing } from '@/lib/campus-data';
+import { formatListingDate } from '@/lib/listing-utils';
 
 const stats = [
   { value: '2,400+', label: 'Active students' },
@@ -70,9 +72,9 @@ export default async function HomePage() {
   const { data: sessionData } = await supabase.auth.getSession();
   const { data: listingsData, error: listingsError } = await supabase
     .from('listings')
-    .select('id, title, owner_name, created_at, item_type, price, icon, tag_class_name')
+    .select('id, title, description, owner_name, created_at, item_type, price, icon, tag_class_name, image_url')
     .order('created_at', { ascending: false })
-    .limit(3);
+    .limit(6);
 
   const isSignedIn = Boolean(sessionData.session?.user);
   const primaryCtaLabel = isSignedIn ? 'Post an item' : 'Join free';
@@ -83,9 +85,11 @@ export default async function HomePage() {
     listingsData?.map((item) => ({
       id: item.id,
       icon: item.icon ?? 'CS',
+      imageUrl: item.image_url,
+      description: item.description,
       title: item.title ?? 'Untitled listing',
       owner: item.owner_name ?? 'CampusShare user',
-      time: item.created_at ? new Date(item.created_at).toLocaleString([], { month: 'short', day: 'numeric' }) : 'just now',
+      time: formatListingDate(item.created_at),
       tag: item.item_type ?? 'New',
       price: getListingDisplayPrice(item.item_type, item.price),
       tagClassName: item.tag_class_name ?? getListingTagClassName(item.item_type),
@@ -174,21 +178,12 @@ export default async function HomePage() {
 
               <div className="space-y-1 p-3">
                 {feedItems.length > 0 ? (
-                  feedItems.map((item, index) => (
-                    <div key={item.id} className={`flex gap-3 rounded-xl p-3 ${index === 2 ? 'opacity-60' : 'hover:bg-cream'}`}>
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-stone-light text-xl font-semibold text-ink-2">
-                        {item.icon}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-ink">{item.title}</p>
-                        <div className="mt-1 flex gap-3 text-xs text-ink-3">
-                          <span>{item.owner}</span>
-                          <span>{item.time}</span>
-                        </div>
-                        <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${item.tagClassName}`}>{item.tag}</div>
-                      </div>
-                      <div className="text-sm font-semibold text-ink">{item.price}</div>
-                    </div>
+                  feedItems.slice(0, 3).map((item, index) => (
+                    <ListingFeedRow
+                      key={item.id}
+                      item={item}
+                      faded={index === 2}
+                    />
                   ))
                 ) : (
                   <div className="rounded-[1.5rem] border border-dashed border-stone-light bg-cream px-5 py-8 text-center">
@@ -291,28 +286,10 @@ export default async function HomePage() {
             </h2>
           </div>
 
-          <div className="mt-10 grid gap-5 lg:grid-cols-3">
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {feedItems.length > 0 ? (
-              feedItems.map((item) => (
-                <article key={item.title} className="overflow-hidden rounded-[1.75rem] border border-stone-light bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-soft">
-                  <div className="flex h-48 items-center justify-center bg-stone-light text-5xl font-semibold text-ink-2">
-                    {item.icon}
-                  </div>
-                  <div className="p-5">
-                    <div className={`mb-3 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${item.tagClassName}`}>{item.tag}</div>
-                    <h3 className="text-[1.05rem] font-medium text-ink">{item.title}</h3>
-                    <div className="mt-4 flex items-center justify-between text-sm text-ink-3">
-                      <span>{item.owner}</span>
-                      <span>{item.time}</span>
-                    </div>
-                    <div className="mt-6 flex items-center justify-between">
-                      <p className="font-bold text-2xl text-ink">{item.price}</p>
-                      <button className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-cream transition hover:bg-ink-2">
-                        Claim
-                      </button>
-                    </div>
-                  </div>
-                </article>
+              feedItems.map((item, index) => (
+                <ListingCard key={item.id} item={item} priority={index < 3} />
               ))
             ) : (
               <div className="rounded-[1.75rem] border border-dashed border-stone-light bg-white p-10 text-center lg:col-span-3">
