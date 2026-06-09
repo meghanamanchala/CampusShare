@@ -16,7 +16,7 @@ export default function ListingNotFound() {
           It may have been removed or the link is incorrect.
         </p>
         <a
-          href="/#listings"
+          href="/feed"
           className="mt-8 rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2"
         >
           Browse live listings

@@ -1,3 +1,5 @@
+export type ListingStatus = 'available' | 'claimed' | 'removed';
+
 export type CampusListing = {
   id: string;
   icon?: string;
@@ -9,7 +11,36 @@ export type CampusListing = {
   tag: string;
   price: string;
   tagClassName: string;
+  status: ListingStatus;
+  claimedBy?: string | null;
+  userId?: string | null;
 };
+
+export function getListingStatusLabel(status: ListingStatus): string {
+  switch (status) {
+    case 'claimed':
+      return 'Claimed';
+
+    case 'removed':
+      return 'Removed';
+
+    default:
+      return 'Available';
+  }
+}
+
+export function getListingStatusClassName(status: ListingStatus): string {
+  switch (status) {
+    case 'claimed':
+      return 'bg-stone-light text-ink-2';
+
+    case 'removed':
+      return 'bg-red-50 text-red-700';
+
+    default:
+      return 'bg-green-light text-green';
+  }
+}
 
 export function getListingTagClassName(
   itemType: string | null | undefined
@@ -53,6 +84,7 @@ export const demoListings: CampusListing[] = [
     tag: 'Free',
     price: 'Free',
     tagClassName: 'bg-[#eaf3de] text-[#2a5c3f]',
+    status: 'available',
   },
   {
     id: 'demo-2',
@@ -64,6 +96,7 @@ export const demoListings: CampusListing[] = [
     tag: 'For sale',
     price: 'Rs 600',
     tagClassName: 'bg-[#f5f0e8] text-[#6b6859]',
+    status: 'available',
   },
   {
     id: 'demo-3',
@@ -75,5 +108,6 @@ export const demoListings: CampusListing[] = [
     tag: 'Borrow',
     price: 'Borrow',
     tagClassName: 'bg-[#eef2f7] text-[#3d6080]',
+    status: 'claimed',
   },
 ];
