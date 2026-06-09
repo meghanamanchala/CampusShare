@@ -1,8 +1,7 @@
 import { ListingCard, ListingFeedRow } from '@/components/listing-card';
 import { SignupForm } from '@/components/signup-form';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { getListingDisplayPrice, getListingTagClassName, type CampusListing } from '@/lib/campus-data';
-import { formatListingDate } from '@/lib/listing-utils';
+import { LISTING_SELECT_FIELDS, mapListingRow } from '@/lib/listings';
 
 const stats = [
   { value: '2,400+', label: 'Active students' },
@@ -72,7 +71,8 @@ export default async function HomePage() {
   const { data: sessionData } = await supabase.auth.getSession();
   const { data: listingsData, error: listingsError } = await supabase
     .from('listings')
-    .select('id, title, description, owner_name, created_at, item_type, price, icon, tag_class_name, image_url')
+    .select(LISTING_SELECT_FIELDS)
+    .eq('status', 'available')
     .order('created_at', { ascending: false })
     .limit(6);
 
@@ -81,19 +81,7 @@ export default async function HomePage() {
   const primaryCtaHref = isSignedIn ? '/post' : '#cta';
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
   const authCallbackUrl = `${siteUrl.replace(/\/$/, '')}/auth/callback`;
-  const feedItems: CampusListing[] =
-    listingsData?.map((item) => ({
-      id: item.id,
-      icon: item.icon ?? 'CS',
-      imageUrl: item.image_url,
-      description: item.description,
-      title: item.title ?? 'Untitled listing',
-      owner: item.owner_name ?? 'CampusShare user',
-      time: formatListingDate(item.created_at),
-      tag: item.item_type ?? 'New',
-      price: getListingDisplayPrice(item.item_type, item.price),
-      tagClassName: item.tag_class_name ?? getListingTagClassName(item.item_type),
-    })) ?? [];
+  const feedItems = listingsData?.map(mapListingRow) ?? [];
 
   return (
     <main className="relative overflow-hidden bg-cream text-ink">
@@ -109,7 +97,7 @@ export default async function HomePage() {
             <a href="#how-it-works" className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light">
               How it works
             </a>
-            <a href="#listings" className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light">
+            <a href="/feed" className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light">
               Browse
             </a>
             <a href="#features" className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light">
@@ -234,7 +222,7 @@ export default async function HomePage() {
               <a href="/post" className="rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2">
                 Open post page
               </a>
-              <a href="#listings" className="rounded-xl border border-stone px-6 py-3 text-sm text-ink-2 transition hover:bg-stone-light">
+              <a href="/feed" className="rounded-xl border border-stone px-6 py-3 text-sm text-ink-2 transition hover:bg-stone-light">
                 Browse live listings
               </a>
             </div>
@@ -299,6 +287,23 @@ export default async function HomePage() {
                 </p>
               </div>
             )}
+          </div>
+
+          <div className="mt-10 flex flex-wrap gap-3">
+            <a
+              href="/feed"
+              className="rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2"
+            >
+              View all listings
+            </a>
+            {isSignedIn ? (
+              <a
+                href="/my-listings"
+                className="rounded-xl border border-stone px-6 py-3 text-sm text-ink-2 transition hover:bg-stone-light"
+              >
+                My listings
+              </a>
+            ) : null}
           </div>
         </div>
       </section>
@@ -418,7 +423,7 @@ export default async function HomePage() {
               <a href="/post" className="rounded-xl bg-ink px-5 py-3 text-sm font-medium text-cream transition hover:bg-ink-2">
                 Post an item
               </a>
-              <a href="#listings" className="rounded-xl border border-stone px-5 py-3 text-sm text-ink-2 transition hover:bg-stone-light">
+              <a href="/feed" className="rounded-xl border border-stone px-5 py-3 text-sm text-ink-2 transition hover:bg-stone-light">
                 Browse live listings
               </a>
             </div>
@@ -445,7 +450,7 @@ export default async function HomePage() {
               <a className="block hover:text-ink" href="#how-it-works">
                 How it works
               </a>
-              <a className="block hover:text-ink" href="#listings">
+              <a className="block hover:text-ink" href="/feed">
                 Browse listings
               </a>
               <a className="block hover:text-ink" href="/post">

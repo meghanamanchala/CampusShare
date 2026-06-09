@@ -3,6 +3,7 @@ type SiteHeaderProps = {
   backLabel?: string;
   actionHref?: string;
   actionLabel?: string;
+  showMyListings?: boolean;
 };
 
 export function SiteHeader({
@@ -10,6 +11,7 @@ export function SiteHeader({
   backLabel = 'Back to Feed',
   actionHref,
   actionLabel,
+  showMyListings = false,
 }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-stone-light/80 bg-cream/90 backdrop-blur-md">
@@ -20,6 +22,22 @@ export function SiteHeader({
         </a>
 
         <div className="flex items-center gap-3">
+          {showMyListings ? (
+            <a
+              href="/my-listings"
+              className="hidden rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light sm:inline-flex"
+            >
+              My listings
+            </a>
+          ) : null}
+
+          <a
+            href="/feed"
+            className="hidden rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light sm:inline-flex"
+          >
+            Browse
+          </a>
+
           {actionHref && actionLabel ? (
             <a
               href={actionHref}

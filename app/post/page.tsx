@@ -24,7 +24,11 @@ export default async function PostPage() {
 
   return (
     <main className="min-h-screen bg-cream text-ink">
-      <SiteHeader backHref="/" backLabel="Back to Feed" />
+      <SiteHeader
+        backHref="/"
+        backLabel="Back to Feed"
+        showMyListings={isSignedIn}
+      />
 
       <section className="mx-auto max-w-6xl px-6 py-16 md:py-20">
         <div className="mb-12 max-w-3xl">
