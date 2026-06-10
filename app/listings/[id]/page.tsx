@@ -51,7 +51,7 @@ export default async function ListingDetailPage({
         showMyListings={isSignedIn}
       />
 
-      <section className="mx-auto max-w-6xl px-6 py-10 md:py-14">
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 py-8 md:py-14">
         <a
           href="/feed"
           className="mb-8 inline-flex items-center gap-2 text-sm text-ink-3 transition hover:text-ink"
@@ -61,13 +61,13 @@ export default async function ListingDetailPage({
         </a>
 
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          <div className="relative overflow-hidden rounded-[2rem] border border-stone-light bg-white shadow-soft">
+          <div className="relative overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-stone-light bg-white shadow-soft">
             <ListingImage
               src={listing.image_url}
               alt={listing.title ?? 'Listing image'}
               title={listing.title ?? 'Listing'}
               priority
-              className="aspect-[4/3] w-full md:aspect-[5/4]"
+              className="aspect-square w-full sm:aspect-[4/3] md:aspect-[5/4]"
               sizes="(max-width: 1024px) 100vw, 60vw"
             />
             {status === 'claimed' ? (
@@ -75,7 +75,7 @@ export default async function ListingDetailPage({
             ) : null}
           </div>
 
-          <div className="rounded-[2rem] border border-stone-light bg-white p-8 shadow-soft md:p-10">
+          <div className="rounded-[2rem] border border-stone-light bg-white p-5 shadow-soft sm:p-6 md:p-10">
             <div className="flex flex-wrap items-center gap-2">
               <div
                 className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${tagClassName}`}
@@ -85,7 +85,7 @@ export default async function ListingDetailPage({
               <ListingStatusBadge status={status} />
             </div>
 
-            <h1 className="mt-5 font-serif text-4xl leading-tight tracking-[-0.03em] text-ink md:text-5xl">
+            <h1 className="mt-5 font-serif text-3xl leading-tight tracking-[-0.03em] text-ink sm:text-4xl md:text-5xl">
               {listing.title}
             </h1>
 
@@ -144,7 +144,7 @@ export default async function ListingDetailPage({
                 Description
               </h2>
               {listing.description ? (
-                <p className="mt-3 whitespace-pre-wrap text-base leading-8 text-ink-2">
+                <p className="mt-3 whitespace-pre-wrap text-sm sm:text-base leading-7 sm:leading-8 text-ink-2">
                   {listing.description}
                 </p>
               ) : (
@@ -154,7 +154,7 @@ export default async function ListingDetailPage({
               )}
             </div>
 
-            <div className="mt-10 space-y-4">
+            <div className="mt-10 flex flex-col gap-4">
               {isOwner ? (
                 <div className="rounded-2xl border border-stone-light bg-cream-dark p-4">
                   <p className="text-sm font-medium text-ink">
@@ -169,15 +169,18 @@ export default async function ListingDetailPage({
                 </div>
               ) : status === 'available' ? (
                 isSignedIn ? (
-                  <ClaimListingButton listingId={listing.id} />
+                  <div className="w-full">
+                    <ClaimListingButton listingId={listing.id} />
+                  </div>
                 ) : (
                   <div className="rounded-2xl border border-stone-light bg-cream-dark p-4">
                     <p className="text-sm text-ink-2">
                       Sign in with your campus email to claim this item.
                     </p>
+
                     <a
                       href="/post"
-                      className="mt-4 inline-flex rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2"
+                      className="mt-4 flex w-full justify-center rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2"
                     >
                       Sign in to claim
                     </a>
@@ -187,7 +190,7 @@ export default async function ListingDetailPage({
 
               <a
                 href="/feed"
-                className="inline-flex rounded-xl border border-stone px-6 py-3 text-sm text-ink-2 transition hover:bg-stone-light"
+                className="flex w-full justify-center rounded-xl border border-stone px-6 py-3 text-sm text-ink-2 transition hover:bg-stone-light"
               >
                 Browse more
               </a>

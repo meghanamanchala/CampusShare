@@ -42,15 +42,15 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
         showMyListings={isSignedIn}
       />
 
-      <section className="mx-auto max-w-6xl px-6 py-12 md:py-16">
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 py-10 md:py-16">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-ink-3">
             Campus Feed
           </p>
-          <h1 className="mt-4 font-serif text-5xl tracking-[-0.03em] md:text-6xl">
+          <h1 className="mt-4 font-serif text-3xl sm:text-4xl md:text-6xl tracking-[-0.03em]">
             Browse <span className="italic text-ink-3">live listings</span>
           </h1>
-          <p className="mt-4 text-lg leading-8 text-ink-2">
+          <p className="mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-ink-2">
             Filter by type and claim items while they are still available.
           </p>
         </div>
@@ -59,13 +59,13 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
           <FeedFilters activeFilter={activeFilter} />
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
           {feedItems.length > 0 ? (
             feedItems.map((item, index) => (
               <ListingCard key={item.id} item={item} priority={index < 3} />
             ))
           ) : (
-            <div className="rounded-[1.75rem] border border-dashed border-stone-light bg-white p-10 text-center md:col-span-2 lg:col-span-3">
+            <div className="rounded-[1.5rem] sm:rounded-[1.75rem] border border-dashed border-stone-light bg-white p-6 sm:p-10 text-center md:col-span-2 lg:col-span-3">
               <p className="text-lg font-medium text-ink">No listings found</p>
               <p className="mt-2 text-sm text-ink-3">
                 {listingsError
@@ -77,7 +77,7 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
               {isSignedIn ? (
                 <a
                   href="/post"
-                  className="mt-6 inline-flex rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2"
+                  className="mt-6 inline-flex w-full sm:w-auto justify-center rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2"
                 >
                   Post an item
                 </a>

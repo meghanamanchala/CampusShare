@@ -5,11 +5,11 @@ export default function ListingNotFound() {
     <main className="min-h-screen bg-cream text-ink">
       <SiteHeader />
 
-      <section className="mx-auto flex max-w-2xl flex-col items-center px-6 py-24 text-center">
+      <section className="mx-auto flex max-w-2xl flex-col items-center px-4 sm:px-6 py-16 sm:py-24 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-3">
           Not found
         </p>
-        <h1 className="mt-4 font-serif text-4xl tracking-[-0.03em] text-ink">
+        <h1 className="mt-4 font-serif text-3xl sm:text-4xl tracking-[-0.03em] text-ink">
           This listing is no longer available
         </h1>
         <p className="mt-4 text-base leading-8 text-ink-2">
@@ -17,7 +17,7 @@ export default function ListingNotFound() {
         </p>
         <a
           href="/feed"
-          className="mt-8 rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2"
+          className="mt-8 flex w-full justify-center rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2 sm:inline-flex sm:w-auto"
         >
           Browse live listings
         </a>

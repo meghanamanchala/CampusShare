@@ -54,11 +54,10 @@ export function MyListingActions({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <a
           href={`/my-listings/${listingId}/edit`}
-          className="rounded-xl border border-stone px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
-        >
+className="w-full rounded-xl border border-stone px-4 py-3 text-center text-sm text-ink-2 transition hover:bg-stone-light sm:w-auto"        >
           Edit
         </a>
 
@@ -67,8 +66,7 @@ export function MyListingActions({
             type="button"
             onClick={handleMarkClaimed}
             disabled={isPending}
-            className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-cream transition hover:bg-ink-2 disabled:opacity-60"
-          >
+className="w-full rounded-xl bg-ink px-4 py-3 text-sm font-medium text-cream transition hover:bg-ink-2 disabled:opacity-60 sm:w-auto"          >
             Mark claimed
           </button>
         ) : null}
@@ -77,8 +75,7 @@ export function MyListingActions({
           type="button"
           onClick={handleDelete}
           disabled={isPending}
-          className="rounded-xl border border-red-200 px-4 py-2 text-sm text-red-700 transition hover:bg-red-50 disabled:opacity-60"
-        >
+className="w-full rounded-xl border border-red-200 px-4 py-3 text-sm text-red-700 transition hover:bg-red-50 disabled:opacity-60 sm:w-auto"        >
           Delete
         </button>
       </div>

@@ -104,23 +104,23 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
   }
 
   return (
-    <Card className="overflow-hidden rounded-[2rem] border border-stone-light bg-white shadow-soft">
-      <CardHeader className="border-b border-stone-light/80 bg-cream/40 pb-6">
+    <Card className="overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-stone-light bg-white shadow-soft">
+      <CardHeader className="border-b border-stone-light/80 bg-cream/40 px-4 py-5 sm:px-6 sm:py-6">
         <div className="inline-flex w-fit items-center rounded-full bg-green-light px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-green">
           Campus Listing
         </div>
 
-        <CardTitle className="mt-4 font-serif text-4xl text-ink">
+        <CardTitle className="mt-4 font-serif text-2xl sm:text-3xl md:text-4xl text-ink">
           Post an Item
         </CardTitle>
 
-        <CardDescription className="max-w-xl text-base leading-7 text-ink-3">
+        <CardDescription className="max-w-xl text-sm sm:text-base leading-6 sm:leading-7 text-ink-3">
           Add a photo and short description so students can find your item quickly.
         </CardDescription>
       </CardHeader>
 
       <form action={formAction} encType="multipart/form-data">
-        <CardContent className="space-y-7 px-6 py-8">
+        <CardContent className="space-y-6 px-4 py-5 sm:px-6 sm:py-8">
           <div className="space-y-2">
             <Label htmlFor="title">Item Title</Label>
             <Input
@@ -172,8 +172,8 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
             />
 
             {imagePreview ? (
-              <div className="overflow-hidden rounded-[1.5rem] border border-stone-light bg-cream-dark">
-                <div className="relative aspect-[16/10] w-full">
+              <div className="overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-stone-light bg-cream-dark">
+                <div className="relative aspect-square sm:aspect-[16/10] w-full">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imagePreview}
@@ -189,13 +189,15 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
                     <X className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="px-4 py-3 text-sm text-ink-3">{selectedFileName}</p>
+                <p className="break-all px-4 py-3 text-sm text-ink-3">
+  {selectedFileName}
+</p>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-stone bg-cream/60 px-6 py-10 text-center transition hover:border-ink hover:bg-cream"
+                className="flex w-full flex-col items-center justify-center rounded-[1.25rem] border border-dashed border-stone bg-cream/60 px-4 py-8 sm:px-6 sm:py-10 text-center transition hover:border-ink hover:bg-cream"
               >
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm">
                   <ImagePlus className="h-5 w-5 text-ink-2" />
@@ -214,7 +216,7 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
             ) : null}
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="itemType">Listing Type</Label>
               <select
@@ -251,7 +253,7 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
             )}
           </div>
 
-          <div className="rounded-2xl border border-stone-light bg-cream-dark p-4">
+          <div className="rounded-xl sm:rounded-2xl border border-stone-light bg-cream-dark p-4">
             <h3 className="font-medium text-ink">Tips for faster responses</h3>
             <ul className="mt-3 space-y-2 text-sm text-ink-3">
               <li>Add a clear photo in good lighting</li>
@@ -261,7 +263,7 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
           </div>
 
           <div
-            className={`rounded-2xl border px-4 py-3 text-sm ${
+            className={`rounded-xl sm:rounded-2xl border px-4 py-3 text-sm ${
               state.status === 'error'
                 ? 'border-red-200 bg-red-50 text-red-700'
                 : state.status === 'success'
@@ -273,11 +275,11 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
           </div>
         </CardContent>
 
-        <CardFooter className="border-t border-stone-light/80 bg-cream/30 px-6 py-6">
+        <CardFooter className="border-t border-stone-light/80 bg-cream/30 px-4 py-4 sm:px-6 sm:py-6">
           <Button
             type="submit"
             disabled={pending || Boolean(imageError)}
-            className="h-12 w-full rounded-xl bg-ink text-cream hover:bg-ink-2"
+            className="h-11 sm:h-12 w-full rounded-xl bg-ink text-cream hover:bg-ink-2"
           >
             {pending ? 'Posting...' : 'Post Listing'}
           </Button>
