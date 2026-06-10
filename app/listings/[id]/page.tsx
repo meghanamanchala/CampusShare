@@ -63,13 +63,14 @@ export default async function ListingDetailPage({
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
           <div className="relative overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-stone-light bg-white shadow-soft">
             <ListingImage
-              src={listing.image_url}
-              alt={listing.title ?? 'Listing image'}
-              title={listing.title ?? 'Listing'}
-              priority
-              className="aspect-square w-full sm:aspect-[4/3] md:aspect-[5/4]"
-              sizes="(max-width: 1024px) 100vw, 60vw"
-            />
+  src={listing.image_url}
+  alt={listing.title ?? 'Listing image'}
+  title={listing.title ?? 'Listing'}
+  priority
+  className="h-[550px] w-full"
+  imageClassName="object-contain"
+  sizes="(max-width: 1024px) 100vw, 60vw"
+/>
             {status === 'claimed' ? (
               <div className="absolute inset-0 bg-ink/25" />
             ) : null}

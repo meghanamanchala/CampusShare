@@ -181,12 +181,11 @@ export function EditListingForm({ listing }: EditListingFormProps) {
 
             {imagePreview ? (
               <div className="overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-stone-light bg-cream-dark">
-                <div className="relative aspect-square sm:aspect-[16/10] w-full">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                <div className="relative flex items-center justify-center bg-white max-h-[500px] min-h-[300px] w-full">
                   <img
                     src={imagePreview}
                     alt="Listing preview"
-                    className="h-full w-full object-cover"
+                    className="max-h-[500px] max-w-full object-contain"
                   />
                   <button
                     type="button"
@@ -251,13 +250,12 @@ export function EditListingForm({ listing }: EditListingFormProps) {
           </div>
 
           <div
-            className={`break-words rounded-2xl border px-4 py-3 text-sm ${
-              state.status === 'error'
+            className={`break-words rounded-2xl border px-4 py-3 text-sm ${state.status === 'error'
                 ? 'border-red-200 bg-red-50 text-red-700'
                 : state.status === 'success'
                   ? 'border-green-200 bg-green-50 text-green-700'
                   : 'border-neutral-200 bg-neutral-50 text-neutral-600'
-            }`}
+              }`}
           >
             {state.message}
           </div>

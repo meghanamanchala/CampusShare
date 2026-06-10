@@ -21,10 +21,8 @@ export type ListingRow = {
   claimed_by?: string | null;
   user_id?: string | null;
 };
-
 export const LISTING_SELECT_FIELDS =
-  'id, title, description, owner_name, created_at, item_type, price, icon, tag_class_name, image_url, status, claimed_by, user_id';
-
+'id,title,description,owner_name,created_at,item_type,price,icon,tag_class_name,image_url,status,claimed_by,user_id,condition,pickup_location,negotiable,borrow_duration,borrow_type,contact_method';
 export const LISTING_TYPE_FILTERS = [
   { label: 'All', value: 'all' },
   { label: 'Free', value: 'free' },

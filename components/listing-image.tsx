@@ -47,7 +47,7 @@ export function ListingImage({
         priority={priority}
         sizes={sizes}
         className={cn(
-  'object-cover transition duration-500 group-hover:scale-105',
+  'transition duration-500 group-hover:scale-105',
   'motion-reduce:transform-none',
   imageClassName
 )}

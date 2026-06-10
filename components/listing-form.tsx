@@ -148,6 +148,142 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="condition">Condition</Label>
+
+            <select
+              id="condition"
+              name="condition"
+              className="h-12 w-full rounded-xl border border-stone-light px-4"
+            >
+              <option value="">Select condition</option>
+              <option value="New">New</option>
+              <option value="Like New">Like New</option>
+              <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pickupLocation">
+              Pickup Location
+            </Label>
+
+            <Input
+              id="pickupLocation"
+              name="pickupLocation"
+              placeholder="Library Entrance"
+            />
+          </div>
+
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="itemType">Listing Type</Label>
+              <select
+                id="itemType"
+                name="itemType"
+                value={listingType}
+                onChange={(event) => setListingType(event.target.value)}
+                className="h-12 w-full rounded-xl border border-stone-light bg-white px-4 text-sm text-ink outline-none transition focus:border-ink"
+              >
+                <option value="Free">Free</option>
+                <option value="For sale">For Sale</option>
+                <option value="Borrow">Borrow</option>
+              </select>
+            </div>
+
+            {listingType === 'For sale' && (
+              <div className="space-y-3">
+                <Label htmlFor="price">Price</Label>
+
+                <Input
+                  id="price"
+                  name="price"
+                  placeholder="₹600"
+                  required
+                />
+
+                <label className="flex items-center gap-2 text-sm text-ink-2">
+                  <input
+                    type="checkbox"
+                    name="negotiable"
+                  />
+                  Negotiable
+                </label>
+              </div>
+            )}
+          </div>
+
+          {listingType === 'Borrow' && (
+            <div className="space-y-4 rounded-xl border border-stone-light p-4">
+              <h3 className="font-medium text-ink">
+                Borrow Details
+              </h3>
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="borrowType"
+                    value="request"
+                  />
+                  I need to borrow this
+                </label>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="borrowType"
+                    value="offer"
+                    defaultChecked
+                  />
+                  I am lending this out
+                </label>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="borrowDuration">
+                  Maximum Duration
+                </Label>
+
+                <Input
+                  id="borrowDuration"
+                  name="borrowDuration"
+                  placeholder="7 days"
+                />
+              </div>
+            </div>
+          )}
+
+
+          <div className="space-y-3">
+            <Label htmlFor="contactMethod">
+              Contact Method
+            </Label>
+
+            <select
+              id="contactMethod"
+              name="contactMethod"
+              className="h-12 w-full rounded-xl border border-stone-light px-4"
+            >
+              <option value="email">
+                Share Institutional Email
+              </option>
+
+              <option value="phone">
+                WhatsApp / Phone
+              </option>
+
+              <option value="chat">
+                In-App Chat
+              </option>
+            </select>
+          </div>
+
+
+
+
+          <div className="space-y-2">
             <Label htmlFor="ownerName">Your Name</Label>
             <Input
               id="ownerName"
@@ -173,12 +309,11 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
 
             {imagePreview ? (
               <div className="overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-stone-light bg-cream-dark">
-                <div className="relative aspect-square sm:aspect-[16/10] w-full">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                <div className="relative max-h-[500px] w-full">
                   <img
                     src={imagePreview}
                     alt="Selected item preview"
-                    className="h-full w-full object-cover"
+                    className="max-h-[500px] w-full object-contain"
                   />
                   <button
                     type="button"
@@ -190,8 +325,8 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
                   </button>
                 </div>
                 <p className="break-all px-4 py-3 text-sm text-ink-3">
-  {selectedFileName}
-</p>
+                  {selectedFileName}
+                </p>
               </div>
             ) : (
               <button
@@ -216,42 +351,7 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
             ) : null}
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="itemType">Listing Type</Label>
-              <select
-                id="itemType"
-                name="itemType"
-                value={listingType}
-                onChange={(event) => setListingType(event.target.value)}
-                className="h-12 w-full rounded-xl border border-stone-light bg-white px-4 text-sm text-ink outline-none transition focus:border-ink"
-              >
-                <option value="Free">Free</option>
-                <option value="For sale">For Sale</option>
-                <option value="Borrow">Borrow</option>
-              </select>
-            </div>
 
-            {listingType === 'For sale' ? (
-              <div className="space-y-2">
-                <Label htmlFor="price">Price</Label>
-                <Input
-                  id="price"
-                  name="price"
-                  placeholder="600"
-                  inputMode="numeric"
-                  required
-                  className="h-12"
-                />
-              </div>
-            ) : (
-              <div className="rounded-2xl bg-cream-dark px-4 py-3 text-sm leading-6 text-ink-2">
-                {listingType === 'Borrow'
-                  ? 'Borrow listings do not need a price.'
-                  : 'Free listings do not need a price.'}
-              </div>
-            )}
-          </div>
 
           <div className="rounded-xl sm:rounded-2xl border border-stone-light bg-cream-dark p-4">
             <h3 className="font-medium text-ink">Tips for faster responses</h3>
@@ -263,19 +363,31 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
           </div>
 
           <div
-            className={`rounded-xl sm:rounded-2xl border px-4 py-3 text-sm ${
-              state.status === 'error'
-                ? 'border-red-200 bg-red-50 text-red-700'
-                : state.status === 'success'
-                  ? 'border-green-200 bg-green-50 text-green-700'
-                  : 'border-neutral-200 bg-neutral-50 text-neutral-600'
-            }`}
+            className={`rounded-xl sm:rounded-2xl border px-4 py-3 text-sm ${state.status === 'error'
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : state.status === 'success'
+                ? 'border-green-200 bg-green-50 text-green-700'
+                : 'border-neutral-200 bg-neutral-50 text-neutral-600'
+              }`}
           >
             {state.message}
           </div>
         </CardContent>
 
-        <CardFooter className="border-t border-stone-light/80 bg-cream/30 px-4 py-4 sm:px-6 sm:py-6">
+        <CardFooter
+          className="
+  sticky
+  bottom-0
+  z-20
+  bg-white
+  border-t
+  border-stone-light
+  px-4
+  py-4
+  shadow-[0_-4px_12px_rgba(0,0,0,0.05)]
+"
+        >
+
           <Button
             type="submit"
             disabled={pending || Boolean(imageError)}

@@ -24,13 +24,14 @@ export function ListingCard({
     >
       <div className="relative">
         <ListingImage
-          src={item.imageUrl}
-          alt={item.title}
-          title={item.title}
-          priority={priority}
-          className="aspect-square sm:aspect-[4/3] w-full"
-          sizes="(max-width: 1024px) 100vw, 33vw"
-        />
+  src={item.imageUrl}
+  alt={item.title}
+  title={item.title}
+  priority={priority}
+className="h-80 w-full"
+imageClassName="object-contain bg-white"
+  sizes="(max-width: 1024px) 100vw, 33vw"
+/>
 
         {isClaimed && (
           <div className="absolute inset-0 bg-ink/20" />
