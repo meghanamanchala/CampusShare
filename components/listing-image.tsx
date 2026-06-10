@@ -31,7 +31,7 @@ export function ListingImage({
           className
         )}
       >
-        <span className="font-serif text-4xl font-semibold tracking-tight text-ink-2/70 md:text-5xl">
+        <span className="font-serif text-3xl font-semibold tracking-tight text-ink-2/70 sm:text-4xl md:text-5xl">
           {initials}
         </span>
       </div>
@@ -46,7 +46,11 @@ export function ListingImage({
         fill
         priority={priority}
         sizes={sizes}
-        className={cn('object-cover transition duration-500 group-hover:scale-105', imageClassName)}
+        className={cn(
+  'object-cover transition duration-500 group-hover:scale-105',
+  'motion-reduce:transform-none',
+  imageClassName
+)}
       />
     </div>
   );

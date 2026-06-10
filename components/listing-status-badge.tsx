@@ -21,7 +21,7 @@ export function ListingStatusBadge({
   return (
     <span
       className={cn(
-        'inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]',
+        'inline-flex items-center rounded-full px-2.5 py-1 text-[10px] sm:px-3 sm:text-[11px] font-semibold uppercase tracking-[0.12em] sm:tracking-[0.16em]',
         getListingStatusClassName(status),
         className
       )}

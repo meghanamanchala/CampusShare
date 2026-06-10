@@ -116,9 +116,9 @@ export function EditListingForm({ listing }: EditListingFormProps) {
   }
 
   return (
-    <Card className="overflow-hidden rounded-[2rem] border border-stone-light bg-white shadow-soft">
-      <CardHeader className="border-b border-stone-light/80 bg-cream/40 pb-6">
-        <CardTitle className="font-serif text-4xl text-ink">
+    <Card className="overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-stone-light bg-white shadow-soft">
+      <CardHeader className="border-b border-stone-light/80 bg-cream/40 px-4 py-5 sm:px-6 sm:py-6">
+        <CardTitle className="font-serif text-3xl sm:text-4xl text-ink">
           Edit Listing
         </CardTitle>
         <CardDescription className="text-ink-3">
@@ -129,7 +129,7 @@ export function EditListingForm({ listing }: EditListingFormProps) {
       <form action={formAction} encType="multipart/form-data">
         <input type="hidden" name="listingId" value={listing.id} />
 
-        <CardContent className="space-y-7 px-6 py-8">
+        <CardContent className="space-y-7 px-4 py-6 sm:px-6 sm:py-8">
           <div className="space-y-2">
             <Label htmlFor="title">Item Title</Label>
             <Input
@@ -180,8 +180,8 @@ export function EditListingForm({ listing }: EditListingFormProps) {
             />
 
             {imagePreview ? (
-              <div className="overflow-hidden rounded-[1.5rem] border border-stone-light bg-cream-dark">
-                <div className="relative aspect-[16/10] w-full">
+              <div className="overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-stone-light bg-cream-dark">
+                <div className="relative aspect-square sm:aspect-[16/10] w-full">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imagePreview}
@@ -197,13 +197,13 @@ export function EditListingForm({ listing }: EditListingFormProps) {
                     <X className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="px-4 py-3 text-sm text-ink-3">{selectedFileName}</p>
+                <p className="break-all px-4 py-3 text-sm text-ink-3">{selectedFileName}</p>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-stone bg-cream/60 px-6 py-10 text-center transition hover:border-ink hover:bg-cream"
+                className="flex w-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-stone bg-cream/60 px-4 py-8 sm:px-6 sm:py-10 text-center transition hover:border-ink hover:bg-cream"
               >
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm">
                   <ImagePlus className="h-5 w-5 text-ink-2" />
@@ -251,7 +251,7 @@ export function EditListingForm({ listing }: EditListingFormProps) {
           </div>
 
           <div
-            className={`rounded-2xl border px-4 py-3 text-sm ${
+            className={`break-words rounded-2xl border px-4 py-3 text-sm ${
               state.status === 'error'
                 ? 'border-red-200 bg-red-50 text-red-700'
                 : state.status === 'success'
@@ -263,7 +263,7 @@ export function EditListingForm({ listing }: EditListingFormProps) {
           </div>
         </CardContent>
 
-        <CardFooter className="border-t border-stone-light/80 bg-cream/30 px-6 py-6">
+        <CardFooter className="border-t border-stone-light/80 bg-cream/30 px-4 py-4 sm:px-6 sm:py-6">
           <Button
             type="submit"
             disabled={pending || Boolean(imageError)}

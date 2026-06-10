@@ -38,7 +38,7 @@ export function ClaimListingButton({
         type="button"
         onClick={handleClaim}
         disabled={disabled || isPending}
-        className="rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full sm:w-auto rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending ? 'Claiming...' : 'Claim item'}
       </button>

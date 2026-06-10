@@ -100,13 +100,13 @@ export function SignupForm({ redirectTo }: SignupFormProps) {
   }
 
   return (
-    <div className="mt-10">
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+    <div className="mt-10 w-full max-w-xl mx-auto">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
         <button
           type="button"
           onClick={handleGoogleSignIn}
           disabled={status === 'loading'}
-          className="rounded-xl border border-stone bg-white px-6 py-3 text-sm font-medium text-ink transition hover:bg-stone-light disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full sm:w-auto rounded-xl border border-stone bg-white px-6 py-3 text-sm font-medium text-ink transition hover:bg-stone-light disabled:cursor-not-allowed disabled:opacity-70"
         >
           <span className="inline-flex items-center gap-2">
             <Globe className="h-4 w-4" />
@@ -114,19 +114,22 @@ export function SignupForm({ redirectTo }: SignupFormProps) {
           </span>
         </button>
         <span className="flex items-center justify-center text-xs uppercase tracking-[0.2em] text-ink-3">or</span>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <form
+  onSubmit={handleSubmit}
+  className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center"
+>
           <input
             type="email"
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="yourname@university.edu"
-            className="min-w-0 flex-1 rounded-xl border border-stone bg-white px-4 py-3 text-sm outline-none transition focus:border-ink"
+            className="w-full min-w-0 rounded-xl border border-stone bg-white px-4 py-3 text-sm outline-none transition focus:border-ink sm:min-w-[280px]"
           />
           <button
             type="submit"
             disabled={status === 'loading' || cooldownSeconds > 0}
-            className="rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2 disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full sm:w-auto rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2 disabled:cursor-not-allowed disabled:opacity-70"
           >
             <span className="inline-flex items-center gap-2">
               <Mail className="h-4 w-4" />
@@ -139,7 +142,7 @@ export function SignupForm({ redirectTo }: SignupFormProps) {
           </button>
         </form>
       </div>
-      <p className="mt-3 text-center text-xs text-ink-3">{message}</p>
+      <p className="mt-4 max-w-md mx-auto px-2 text-center text-xs leading-6 text-ink-3 break-words">{message}</p>
     </div>
   );
 }

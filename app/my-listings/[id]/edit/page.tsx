@@ -43,7 +43,7 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
         showMyListings
       />
 
-      <section className="mx-auto max-w-3xl px-6 py-12 md:py-16">
+      <section className="mx-auto max-w-3xl px-4 sm:px-6 py-10 md:py-16">
         <EditListingForm
           listing={{
             id: listing.id,

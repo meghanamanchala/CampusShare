@@ -30,17 +30,17 @@ export default async function PostPage() {
         showMyListings={isSignedIn}
       />
 
-      <section className="mx-auto max-w-6xl px-6 py-16 md:py-20">
-        <div className="mb-12 max-w-3xl">
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-16 md:py-20">
+        <div className="mb-8 max-w-3xl sm:mb-12">
           <span className="inline-flex items-center rounded-full bg-green-light px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-green">
             Campus Marketplace
           </span>
 
-          <h1 className="mt-6 font-serif text-5xl tracking-[-0.03em] md:text-7xl">
+          <h1 className="mt-5 font-serif text-4xl tracking-[-0.03em] sm:text-5xl md:text-7xl">
             Post an <span className="italic text-ink-3">Item</span>
           </h1>
 
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-ink-2">
+          <p className="mt-4 max-w-2xl text-base leading-7 text-ink-2 sm:text-lg sm:leading-8">
             Share, sell, lend, or give away useful items to students in your
             campus community.
           </p>
@@ -51,12 +51,12 @@ export default async function PostPage() {
             <ListingForm defaultOwnerName={defaultOwnerName} />
           </div>
         ) : (
-          <div className="max-w-2xl rounded-[2rem] border border-stone-light bg-white p-8 shadow-soft">
-            <h2 className="font-serif text-3xl text-ink">
+          <div className="max-w-2xl rounded-[1.5rem] sm:rounded-[2rem] border border-stone-light bg-white p-5 sm:p-8 shadow-soft">
+            <h2 className="font-serif text-2xl sm:text-3xl text-ink">
               Sign in to continue
             </h2>
 
-            <p className="mt-3 text-ink-3">
+            <p className="mt-3 text-sm sm:text-base text-ink-3">
               Use your campus email to create and manage listings.
             </p>
 

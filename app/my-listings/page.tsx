@@ -35,12 +35,12 @@ export default async function MyListingsPage() {
         showMyListings
       />
 
-      <section className="mx-auto max-w-6xl px-6 py-12 md:py-16">
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 py-10 md:py-16">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-ink-3">
             Your listings
           </p>
-          <h1 className="mt-4 font-serif text-5xl tracking-[-0.03em] md:text-6xl">
+          <h1 className="mt-4 font-serif text-4xl tracking-[-0.03em] sm:text-5xl md:text-6xl">
             Manage <span className="italic text-ink-3">your posts</span>
           </h1>
           <p className="mt-4 text-lg leading-8 text-ink-2">
@@ -55,14 +55,14 @@ export default async function MyListingsPage() {
               listings.map((item) => (
                 <article
                   key={item.id}
-                  className="overflow-hidden rounded-[1.75rem] border border-stone-light bg-white shadow-sm"
+                  className="overflow-hidden rounded-[1.25rem] sm:rounded-[1.75rem] border border-stone-light bg-white shadow-sm"
                 >
-                  <div className="grid gap-0 md:grid-cols-[220px_1fr]">
+                  <div className="grid gap-0 lg:grid-cols-[220px_1fr]">
                     <ListingImage
                       src={item.imageUrl}
                       alt={item.title}
                       title={item.title}
-                      className="aspect-[4/3] w-full md:aspect-auto md:h-full md:min-h-[180px]"
+                      className="aspect-square w-full sm:aspect-[4/3] md:aspect-auto md:h-full md:min-h-[180px]"
                       sizes="220px"
                     />
 
@@ -107,7 +107,7 @@ export default async function MyListingsPage() {
                 </article>
               ))
             ) : (
-              <div className="rounded-[1.75rem] border border-dashed border-stone-light bg-white p-10 text-center">
+              <div className="rounded-[1.5rem] sm:rounded-[1.75rem] border border-dashed border-stone-light bg-white p-6 sm:p-10 text-center">
                 <p className="text-lg font-medium text-ink">
                   You have not posted anything yet
                 </p>
@@ -116,7 +116,7 @@ export default async function MyListingsPage() {
                 </p>
                 <a
                   href="/post"
-                  className="mt-6 inline-flex rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2"
+                  className="mt-6 flex w-full justify-center rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2 sm:inline-flex sm:w-auto"
                 >
                   Post an item
                 </a>
