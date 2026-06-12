@@ -415,12 +415,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="cta" className="mx-auto max-w-3xl px-6 py-24 text-center">
+      <section
+  id="cta"
+  className="mx-auto max-w-4xl px-6 py-12 md:py-16 text-center"
+>
         <div className="inline-flex items-center gap-2 rounded-full bg-green-light px-5 py-2 text-sm font-medium text-green">
           <span className="h-1.5 w-1.5 rounded-full bg-green" />
           {isSignedIn ? 'Ready to post' : 'Open for early access'}
         </div>
-        <h2 className="mt-6 font-bold text-4xl tracking-[-0.03em] md:text-6xl">
+        <h2 className="mt-4 font-bold text-4xl tracking-[-0.03em] md:text-5xl">
           {isSignedIn ? (
             <>
               You’re in on <span className="italic text-ink-3">your campus</span>
@@ -431,7 +434,7 @@ export default async function HomePage() {
             </>
           )}
         </h2>
-        <p className="mx-auto mt-5 max-w-2xl text-lg font-light leading-8 text-ink-2">
+        <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-ink-2">
           {isSignedIn
             ? 'Your account is confirmed. Post your first item now and it will appear in the live campus feed.'
             : 'Join students already reducing waste, saving money, and helping their campus community.'}

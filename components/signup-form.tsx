@@ -100,49 +100,59 @@ export function SignupForm({ redirectTo }: SignupFormProps) {
   }
 
   return (
-    <div className="mt-10 w-full max-w-xl mx-auto">
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+  <div className="mt-12 w-full max-w-3xl mx-auto">
+    <div className="flex flex-col items-center gap-5 lg:flex-row lg:justify-center">
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={status === 'loading'}
+        className="flex h-16 min-w-[220px] items-center justify-center rounded-2xl border border-stone bg-white px-8 text-base font-medium text-ink transition hover:bg-stone-light disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        <span className="inline-flex items-center gap-3">
+          <Globe className="h-5 w-5" />
+          {status === 'loading' && provider === 'google'
+            ? 'Connecting...'
+            : 'Continue with Google'}
+        </span>
+      </button>
+
+      <span className="text-sm font-medium uppercase tracking-[0.3em] text-ink-3">
+        OR
+      </span>
+
+      <form
+        onSubmit={handleSubmit}
+        className="flex w-full max-w-2xl flex-col gap-4 sm:flex-row"
+      >
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="yourname@university.edu"
+          className="h-16 flex-1 rounded-2xl border border-stone bg-white px-6 text-base outline-none transition focus:border-ink"
+        />
+
         <button
-          type="button"
-          onClick={handleGoogleSignIn}
-          disabled={status === 'loading'}
-          className="w-full sm:w-auto rounded-xl border border-stone bg-white px-6 py-3 text-sm font-medium text-ink transition hover:bg-stone-light disabled:cursor-not-allowed disabled:opacity-70"
+          type="submit"
+          disabled={status === 'loading' || cooldownSeconds > 0}
+          className="flex h-16 items-center justify-center rounded-2xl bg-ink px-10 text-base font-medium text-cream transition hover:bg-ink-2 disabled:cursor-not-allowed disabled:opacity-70"
         >
           <span className="inline-flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            {status === 'loading' && provider === 'google' ? 'Connecting...' : 'Continue with Google'}
+            <Mail className="h-5 w-5" />
+            {status === 'loading' && provider === 'email'
+              ? 'Sending...'
+              : cooldownSeconds > 0
+                ? `Wait ${cooldownSeconds}s`
+                : 'Join free'}
           </span>
         </button>
-        <span className="flex items-center justify-center text-xs uppercase tracking-[0.2em] text-ink-3">or</span>
-        <form
-  onSubmit={handleSubmit}
-  className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center"
->
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="yourname@university.edu"
-            className="w-full min-w-0 rounded-xl border border-stone bg-white px-4 py-3 text-sm outline-none transition focus:border-ink sm:min-w-[280px]"
-          />
-          <button
-            type="submit"
-            disabled={status === 'loading' || cooldownSeconds > 0}
-            className="w-full sm:w-auto rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <span className="inline-flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              {status === 'loading' && provider === 'email'
-                ? 'Sending...'
-                : cooldownSeconds > 0
-                  ? `Wait ${cooldownSeconds}s`
-                  : 'Join free'}
-            </span>
-          </button>
-        </form>
-      </div>
-      <p className="mt-4 max-w-md mx-auto px-2 text-center text-xs leading-6 text-ink-3 break-words">{message}</p>
+      </form>
     </div>
-  );
+
+    <p className="mt-6 max-w-2xl mx-auto text-center text-sm leading-6 text-ink-3">
+      {message}
+    </p>
+  </div>
+);
 }
