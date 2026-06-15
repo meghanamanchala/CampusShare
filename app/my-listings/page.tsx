@@ -12,7 +12,6 @@ export default async function MyListingsPage() {
   const isSignedIn = Boolean(sessionData.session?.user);
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-  const authCallbackUrl = `${siteUrl.replace(/\/$/, '')}/auth/callback?next=/my-listings`;
 
   let listings: ReturnType<typeof mapListingRow>[] = [];
 
@@ -130,7 +129,7 @@ export default async function MyListingsPage() {
               Use your campus email to view and manage your listings.
             </p>
             <div className="mt-6">
-              <SignupForm redirectTo={authCallbackUrl} />
+              <SignupForm redirectTo="/auth/pending" />
             </div>
           </div>
         )}
