@@ -14,7 +14,7 @@ const ALLOWED_CAMPUS_DOMAINS = [
 ];
 
 type SignupFormProps = {
-  redirectTo?: '/auth/pending';
+  redirectTo?: string;
 };
 
 export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
@@ -134,8 +134,8 @@ export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
 
       // Redirect after 2 seconds
       setTimeout(() => {
-        router.push(redirectTo);
-      }, 2000);
+    router.push(redirectTo as any);  // Cast to bypass strict typedRoutes
+  }, 2000);
 
     } catch (error) {
       setStatus('error');
