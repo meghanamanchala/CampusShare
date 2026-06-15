@@ -34,10 +34,23 @@ export default function AdminVerificationsPage() {
   const [selectedTab, setSelectedTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [selectedCampus, setSelectedCampus] = useState<Record<string, string>>({});
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  
+  // FIX: Add success message state
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdminAndFetchData();
   }, []);
+
+  // FIX: Auto-hide success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   async function checkAdminAndFetchData() {
     const supabase = createSupabaseBrowserClient();
@@ -118,6 +131,7 @@ export default function AdminVerificationsPage() {
       return;
     }
 
+    // FIX: Set loading state for THIS specific user only
     setActionLoading(userId);
 
     try {
@@ -150,12 +164,15 @@ export default function AdminVerificationsPage() {
 
       if (profileError) throw profileError;
 
+      // FIX: Show success message
+      setSuccessMessage(`✅ ${email} has been approved successfully!`);
+      
       // Refresh data
       await checkAdminAndFetchData();
+      setActionLoading(null);
     } catch (error) {
       console.error('Approval error:', error);
       alert('Failed to approve user. Please try again.');
-    } finally {
       setActionLoading(null);
     }
   }
@@ -165,6 +182,7 @@ export default function AdminVerificationsPage() {
       return;
     }
 
+    // FIX: Set loading state for THIS specific user only
     setActionLoading(userId);
 
     try {
@@ -177,12 +195,15 @@ export default function AdminVerificationsPage() {
 
       if (error) throw error;
 
+      // FIX: Show success message
+      setSuccessMessage('❌ User has been rejected successfully!');
+      
       // Refresh data
       await checkAdminAndFetchData();
+      setActionLoading(null);
     } catch (error) {
       console.error('Rejection error:', error);
       alert('Failed to reject user. Please try again.');
-    } finally {
       setActionLoading(null);
     }
   }
@@ -191,7 +212,7 @@ export default function AdminVerificationsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-spin" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -232,6 +253,18 @@ export default function AdminVerificationsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* FIX: Add Success Toast Notification */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-pulse">
+          {successMessage.includes('✅') ? (
+            <CheckCircle className="h-5 w-5" />
+          ) : (
+            <XCircle className="h-5 w-5" />
+          )}
+          <span className="font-medium">{successMessage}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-6">
@@ -339,7 +372,7 @@ export default function AdminVerificationsPage() {
                     </p>
                   </div>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                       user.status === 'pending'
                         ? 'bg-yellow-100 text-yellow-800'
                         : user.status === 'approved'
@@ -353,8 +386,8 @@ export default function AdminVerificationsPage() {
 
                 {/* Actions */}
                 {selectedTab === 'pending' && (
-                  <div className="space-y-4">
-                    <div>
+                  <>
+                    <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-900 mb-2">
                         Assign Campus:
                       </label>
@@ -366,7 +399,8 @@ export default function AdminVerificationsPage() {
                             [user.user_id]: e.target.value,
                           }))
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                        disabled={actionLoading === user.user_id}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black disabled:bg-gray-100 disabled:cursor-not-allowed"
                       >
                         <option value="">Select a campus...</option>
                         {campuses.map((campus) => (
@@ -377,26 +411,54 @@ export default function AdminVerificationsPage() {
                       </select>
                     </div>
 
-                    <div className="flex gap-3">
+                    {/* Button Container - FIXED: Proper loading state per button */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                       <button
                         onClick={() => handleApprove(user.user_id, user.email)}
                         disabled={
                           actionLoading === user.user_id ||
                           !selectedCampus[user.user_id]
                         }
-                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium"
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '8px',
+                          fontWeight: '500',
+                          border: 'none',
+                          cursor: actionLoading === user.user_id || !selectedCampus[user.user_id] ? 'not-allowed' : 'pointer',
+                          backgroundColor:
+                            actionLoading === user.user_id || !selectedCampus[user.user_id]
+                              ? '#d1d5db'
+                              : '#16a34a',
+                          color:
+                            actionLoading === user.user_id || !selectedCampus[user.user_id]
+                              ? '#374151'
+                              : 'white',
+                          transition: 'all 0.2s',
+                        }}
                       >
                         {actionLoading === user.user_id ? 'Approving...' : 'Approve'}
                       </button>
                       <button
                         onClick={() => handleReject(user.user_id)}
                         disabled={actionLoading === user.user_id}
-                        className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium"
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '8px',
+                          fontWeight: '500',
+                          border: 'none',
+                          cursor: actionLoading === user.user_id ? 'not-allowed' : 'pointer',
+                          backgroundColor:
+                            actionLoading === user.user_id ? '#d1d5db' : '#dc2626',
+                          color:
+                            actionLoading === user.user_id ? '#374151' : 'white',
+                          transition: 'all 0.2s',
+                        }}
                       >
-                        {actionLoading === user.user_id ? 'Rejecting...' : 'Reject'}
+                        {/* FIX: Only show loading when THIS user is being rejected */}
+                        {actionLoading === user.user_id && selectedTab === 'pending' ? 'Rejecting...' : 'Reject'}
                       </button>
                     </div>
-                  </div>
+                  </>
                 )}
 
                 {selectedTab === 'approved' && (
