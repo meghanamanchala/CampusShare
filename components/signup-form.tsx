@@ -1,158 +1,268 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Globe, Mail } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Mail, Lock, User } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
+const ALLOWED_CAMPUS_DOMAINS = [
+  'iitd.ac.in',
+  'vitstudent.ac.in',
+  'bits-pilani.ac.in',
+  'apollouniversity.edu.in',
+  'lpu.in',
+];
+
 type SignupFormProps = {
-  redirectTo: string;
+  redirectTo?: '/auth/pending';
 };
 
-export function SignupForm({ redirectTo }: SignupFormProps) {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('No spam. Supabase can send the verification link to your campus email.');
+export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
+  const router = useRouter();
+  
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [provider, setProvider] = useState<'email' | 'google' | null>(null);
-  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+  const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    if (cooldownSeconds <= 0) {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      setCooldownSeconds((current) => Math.max(0, current - 1));
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [cooldownSeconds]);
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (provider === 'google') {
-      return;
-    }
-
-    if (cooldownSeconds > 0) {
-      setStatus('error');
-      setMessage(`Please wait ${cooldownSeconds}s before requesting another email.`);
-      return;
-    }
-
-    setStatus('loading');
-
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: redirectTo,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      setStatus('success');
-      setMessage(`Verification link sent to ${email}. Check your inbox to continue.`);
-      setEmail('');
-      setCooldownSeconds(30);
-    } catch (error) {
-      const rawMessage = error instanceof Error ? error.message : 'Could not send verification link.';
-      const fallbackMessage = /rate limit|too many/i.test(rawMessage)
-        ? 'Email rate limit exceeded. Wait a minute, then try again.'
-        : rawMessage;
-      setStatus('error');
-      setMessage(fallbackMessage);
-      if (/rate limit|too many/i.test(rawMessage)) {
-        setCooldownSeconds(60);
-      }
-    }
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   }
 
-  async function handleGoogleSignIn() {
+  async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    // Validation
+    if (!formData.fullName.trim()) {
+      setStatus('error');
+      setMessage('Please enter your full name');
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setStatus('error');
+      setMessage('Please enter your email');
+      return;
+    }
+
+    const domain = formData.email.split('@')[1]?.toLowerCase();
+
+    if (!domain || !ALLOWED_CAMPUS_DOMAINS.includes(domain)) {
+      setStatus('error');
+      setMessage(
+        'Please use a valid campus email address. Supported domains: iitd.ac.in, vitstudent.ac.in, bits-pilani.ac.in, apollouniversity.edu.in'
+      );
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setStatus('error');
+      setMessage('Password must be at least 8 characters long');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setStatus('error');
+      setMessage('Passwords do not match');
+      return;
+    }
+
     setStatus('loading');
-    setProvider('google');
+    setMessage('');
 
     try {
       const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+
+      // Step 1: Sign up user
+      const { data: authData, error: signupError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
         options: {
-          redirectTo,
+          data: {
+            full_name: formData.fullName,
+          },
         },
       });
 
-      if (error) {
-        throw error;
+      if (signupError) throw signupError;
+
+      if (!authData.user) {
+        throw new Error('Failed to create user account');
       }
+
+      // Step 2: Create profile
+      const { error: profileError } = await supabase.from('profiles').insert({
+        id: authData.user.id,
+        email: formData.email,
+        full_name: formData.fullName,
+        is_verified: false,
+        is_admin: false,
+      });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        // Don't throw, profile might already exist
+      }
+
+      // Step 3: Create verification record
+      const { error: verificationError } = await supabase
+        .from('user_verifications')
+        .insert({
+          user_id: authData.user.id,
+          email: formData.email,
+          status: 'pending',
+        });
+
+      if (verificationError) {
+        console.error('Verification record error:', verificationError);
+        throw verificationError;
+      }
+
+      // Step 4: Sign out the newly created user (they can't access anything yet)
+      await supabase.auth.signOut();
+
+      setStatus('success');
+      setMessage(
+        '✅ Signup successful! Your campus email is now pending admin verification. You will be able to sign in once approved.'
+      );
+
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        router.push(redirectTo);
+      }, 2000);
+
     } catch (error) {
-      const rawMessage = error instanceof Error ? error.message : 'Could not start Google sign-in.';
-      const fallbackMessage = /provider|oauth|google/i.test(rawMessage)
-        ? 'Google sign-in is not enabled yet. Turn on the Google provider in Supabase Auth.'
-        : rawMessage;
       setStatus('error');
-      setProvider(null);
-      setMessage(fallbackMessage);
+      const errorMessage = error instanceof Error ? error.message : 'Signup failed. Please try again.';
+      setMessage(errorMessage);
+      console.error('Signup error:', error);
     }
   }
 
   return (
-  <div className="mt-12 w-full max-w-3xl mx-auto">
-    <div className="flex flex-col items-center gap-5 lg:flex-row lg:justify-center">
-      <button
-        type="button"
-        onClick={handleGoogleSignIn}
-        disabled={status === 'loading'}
-        className="flex h-16 min-w-[220px] items-center justify-center rounded-2xl border border-stone bg-white px-8 text-base font-medium text-ink transition hover:bg-stone-light disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        <span className="inline-flex items-center gap-3">
-          <Globe className="h-5 w-5" />
-          {status === 'loading' && provider === 'google'
-            ? 'Connecting...'
-            : 'Continue with Google'}
-        </span>
-      </button>
+    <div className="w-full max-w-md mx-auto">
+      <form onSubmit={handleSignup} className="space-y-5">
+        {/* Full Name */}
+        <div>
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-900 mb-2">
+            Full Name
+          </label>
+          <div className="relative">
+            <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              placeholder="Your full name"
+              required
+              disabled={status === 'loading'}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black disabled:bg-gray-100"
+            />
+          </div>
+        </div>
 
-      <span className="text-sm font-medium uppercase tracking-[0.3em] text-ink-3">
-        OR
-      </span>
+        {/* Email */}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
+            Campus Email
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="student@iitd.ac.in"
+              required
+              disabled={status === 'loading'}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black disabled:bg-gray-100"
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Use your official campus email address
+          </p>
+        </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="flex w-full max-w-2xl flex-col gap-4 sm:flex-row"
-      >
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="yourname@university.edu"
-          className="h-16 flex-1 rounded-2xl border border-stone bg-white px-6 text-base outline-none transition focus:border-ink"
-        />
+        {/* Password */}
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
+            Password
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Minimum 8 characters"
+              required
+              disabled={status === 'loading'}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black disabled:bg-gray-100"
+            />
+          </div>
+        </div>
 
+        {/* Confirm Password */}
+        <div>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-900 mb-2">
+            Confirm Password
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm your password"
+              required
+              disabled={status === 'loading'}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black disabled:bg-gray-100"
+            />
+          </div>
+        </div>
+
+        {/* Status Message */}
+        {message && (
+          <div
+            className={`p-3 rounded-lg text-sm ${
+              status === 'error'
+                ? 'bg-red-50 text-red-800 border border-red-200'
+                : 'bg-green-50 text-green-800 border border-green-200'
+            }`}
+          >
+            {message}
+          </div>
+        )}
+
+        {/* Submit Button */}
         <button
           type="submit"
-          disabled={status === 'loading' || cooldownSeconds > 0}
-          className="flex h-16 items-center justify-center rounded-2xl bg-ink px-10 text-base font-medium text-cream transition hover:bg-ink-2 disabled:cursor-not-allowed disabled:opacity-70"
+          disabled={status === 'loading' || status === 'success'}
+          className="w-full py-2 px-4 bg-black text-white font-medium rounded-lg hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
         >
-          <span className="inline-flex items-center gap-2">
-            <Mail className="h-5 w-5" />
-            {status === 'loading' && provider === 'email'
-              ? 'Sending...'
-              : cooldownSeconds > 0
-                ? `Wait ${cooldownSeconds}s`
-                : 'Join free'}
-          </span>
+          {status === 'loading' ? 'Creating account...' : 'Sign up'}
         </button>
+
+        {/* Terms & Conditions */}
+        <p className="text-xs text-gray-500 text-center">
+          By signing up, you agree to our Terms of Service and Privacy Policy.
+          Your account will need admin verification before you can access the platform.
+        </p>
       </form>
     </div>
-
-    <p className="mt-6 max-w-2xl mx-auto text-center text-sm leading-6 text-ink-3">
-      {message}
-    </p>
-  </div>
-);
+  );
 }

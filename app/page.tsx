@@ -1,8 +1,8 @@
 import MobileMenu from '@/components/mobile-menu';
 import { ListingCard, ListingFeedRow } from '@/components/listing-card';
-import { SignupForm } from '@/components/signup-form';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { LISTING_SELECT_FIELDS, mapListingRow } from '@/lib/listings';
+import Link from "next/link";
 
 const stats = [
   { value: '2,400+', label: 'Active students' },
@@ -89,50 +89,50 @@ export default async function HomePage() {
       <div className="absolute right-[-8rem] top-[-8rem] h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(214,208,200,0.85)_0%,rgba(245,243,238,0)_70%)]" />
 
       <header className="sticky top-0 z-50 border-b border-stone-light/80 bg-cream/90 backdrop-blur-md">
-  <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-    <a href="#top" className="flex items-center gap-3 font-bold text-xl">
-      <span className="h-2 w-2 rounded-full bg-accent" />
-      CampusShare
-    </a>
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <a href="#top" className="flex items-center gap-3 font-bold text-xl">
+            <span className="h-2 w-2 rounded-full bg-accent" />
+            CampusShare
+          </a>
 
-    {/* Mobile Menu Button */}
-    <MobileMenu
-  primaryCtaHref={primaryCtaHref}
-  primaryCtaLabel={primaryCtaLabel}
-/>
+          {/* Mobile Menu Button */}
+          <MobileMenu
+            primaryCtaHref={primaryCtaHref}
+            primaryCtaLabel={primaryCtaLabel}
+          />
 
-    {/* Desktop Menu */}
-    <nav className="hidden items-center gap-2 md:flex">
-      <a
-        href="#how-it-works"
-        className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
-      >
-        How it works
-      </a>
+          {/* Desktop Menu */}
+          <nav className="hidden items-center gap-2 md:flex">
+            <a
+              href="#how-it-works"
+              className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
+            >
+              How it works
+            </a>
 
-      <a
-        href="/feed"
-        className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
-      >
-        Browse
-      </a>
+            <a
+              href="/feed"
+              className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
+            >
+              Browse
+            </a>
 
-      <a
-        href="#features"
-        className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
-      >
-        Features
-      </a>
+            <a
+              href="#features"
+              className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
+            >
+              Features
+            </a>
 
-      <a
-        href={primaryCtaHref}
-        className="rounded-xl bg-ink px-5 py-2.5 text-sm font-medium text-cream"
-      >
-        {primaryCtaLabel}
-      </a>
-    </nav>
-  </div>
-</header>
+            <a
+              href={primaryCtaHref}
+              className="rounded-xl bg-ink px-5 py-2.5 text-sm font-medium text-cream"
+            >
+              {primaryCtaLabel}
+            </a>
+          </nav>
+        </div>
+      </header>
 
       <section id="top" className="relative mx-auto max-w-6xl px-4 sm:px-6 pb-16 pt-16 md:pb-24 md:pt-28">
         <div className="grid items-center gap-16 lg:grid-cols-2">
@@ -416,47 +416,74 @@ export default async function HomePage() {
       </section>
 
       <section
-  id="cta"
-  className="mx-auto max-w-4xl px-6 py-12 md:py-16 text-center"
->
+        id="cta"
+        className="mx-auto max-w-4xl px-6 py-12 md:py-16 text-center"
+      >
         <div className="inline-flex items-center gap-2 rounded-full bg-green-light px-5 py-2 text-sm font-medium text-green">
           <span className="h-1.5 w-1.5 rounded-full bg-green" />
           {isSignedIn ? 'Ready to post' : 'Open for early access'}
         </div>
+
         <h2 className="mt-4 font-bold text-4xl tracking-[-0.03em] md:text-5xl">
-          {isSignedIn ? (
-            <>
-              You’re in on <span className="italic text-ink-3">your campus</span>
-            </>
-          ) : (
-            <>
-              Start sharing on <span className="italic text-ink-3">your campus</span>
-            </>
-          )}
+          Start sharing on{" "}
+          <span className="italic text-ink-3">your campus</span>
         </h2>
+
         <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-ink-2">
-          {isSignedIn
-            ? 'Your account is confirmed. Post your first item now and it will appear in the live campus feed.'
-            : 'Join students already reducing waste, saving money, and helping their campus community.'}
+          Join students already reducing waste, saving money, and helping their
+          campus community.
         </p>
 
         {isSignedIn ? (
           <div className="mt-8 rounded-[1.75rem] border border-stone-light bg-white p-8 text-left shadow-sm">
-            <p className="text-sm font-medium text-ink">Signed in and ready to publish</p>
-            <p className="mt-2 text-sm leading-7 text-ink-2">
-              The signup step is complete. Open the dedicated posting page and add a listing to the live feed.
+            <p className="text-sm font-medium text-ink">
+              Signed in and ready to publish
             </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-start text-center sm:justify-start">
-              <a href="/post" className="rounded-xl bg-ink px-5 py-3 text-sm font-medium text-cream transition hover:bg-ink-2">
+
+            <p className="mt-2 text-sm leading-7 text-ink-2">
+              The signup step is complete. Open the dedicated posting page and add a
+              listing to the live feed.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="/post"
+                className="rounded-xl bg-ink px-5 py-3 text-sm font-medium text-cream"
+              >
                 Post an item
               </a>
-              <a href="/feed" className="rounded-xl border border-stone px-5 py-3 text-sm text-ink-2 transition hover:bg-stone-light">
-                Browse live listings
+
+              <a
+                href="/feed"
+                className="rounded-xl border border-stone px-5 py-3 text-sm text-ink-2"
+              >
+                Browse listings
               </a>
             </div>
           </div>
         ) : (
-          <SignupForm redirectTo={authCallbackUrl} />
+          <div className="mt-8 text-center">
+            <h3 className="text-3xl font-bold mb-4">Join CampusShare</h3>
+
+            <p className="text-gray-600 mb-6">
+              Connect with your campus community. Share, borrow, buy, or sell items
+              with verified peers.
+            </p>
+
+            <Link
+              href="/auth/signup"
+              className="inline-block px-8 py-3 bg-black text-white rounded-lg hover:bg-gray-900"
+            >
+              Get Started
+            </Link>
+
+            <p className="text-sm text-gray-600 mt-4">
+              Already have an account?{" "}
+              <Link href="/auth/login" className="text-black hover:underline">
+                Sign in
+              </Link>
+            </p>
+          </div>
         )}
       </section>
 
