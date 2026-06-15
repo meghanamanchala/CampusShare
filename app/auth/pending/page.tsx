@@ -30,9 +30,10 @@ export default function PendingPage() {
         data: { user },
       } = await supabase.auth.getUser();
 
+      // ✅ FIX: User without session should see pending, not rejected
       if (!user) {
-        setStatus('rejected');
-        setMessage('No user session found. Please sign up again.');
+        setStatus('pending');
+        setMessage('Your signup is pending admin review. Check back soon!');
         return;
       }
 
@@ -46,6 +47,7 @@ export default function PendingPage() {
 
       if (!verificationData) {
         setStatus('pending');
+        setMessage('Your signup is pending admin review. Check back soon!');
         return;
       }
 
@@ -53,7 +55,7 @@ export default function PendingPage() {
         setStatus('approved');
         setMessage('Your campus email has been verified! You can now sign in.');
         
-        // FIXED: Sign out first, then redirect to login
+        // Sign out first, then redirect to login
         setTimeout(async () => {
           await supabase.auth.signOut();
           router.push('/auth/login');
@@ -72,7 +74,7 @@ export default function PendingPage() {
     }
   }
 
-  // FIXED: New handler that signs out before redirecting
+  // Sign out before redirecting to login
   async function handleSignInNow() {
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
@@ -143,7 +145,7 @@ export default function PendingPage() {
     );
   }
 
-  // Status: pending
+  // Status: pending (default)
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-md mx-auto px-6 py-16 sm:py-24">
@@ -152,7 +154,7 @@ export default function PendingPage() {
             <Clock className="h-16 w-16 text-yellow-500 mx-auto mb-4 animate-bounce" />
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Pending Verification</h1>
             <p className="text-gray-600">
-              Your campus email <strong>{email}</strong> is awaiting admin verification.
+              Your campus email {email && <strong>{email}</strong>} is awaiting admin verification.
             </p>
           </div>
 
