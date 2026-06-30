@@ -51,3 +51,20 @@ CampusShare provides:
 - Supabase combines authentication, Postgres, storage, and real-time features in one platform.
 - Vercel gives a simple deployment path for the Next.js app.
 
+## Development
+
+To run the application locally:
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Set up environment variables in a `.env.local` file.
+
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+
