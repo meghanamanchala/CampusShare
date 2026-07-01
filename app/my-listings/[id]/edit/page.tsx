@@ -53,6 +53,12 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
             itemType: listing.item_type ?? 'Free',
             price: listing.price ?? '',
             imageUrl: listing.image_url,
+            condition: listing.condition ?? '',
+            pickupLocation: listing.pickup_location ?? '',
+            negotiable: Boolean(listing.negotiable),
+            borrowDuration: listing.borrow_duration ?? '',
+            borrowType: listing.borrow_type ?? '',
+            contactMethod: listing.contact_method ?? 'email',
           }}
         />
       </section>

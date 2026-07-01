@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Calendar, Tag, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Tag, User, Clock, Info, MapPin, MessageSquare, Coins } from 'lucide-react';
 import { ClaimListingButton } from '@/components/claim-listing-button';
 import { ListingImage } from '@/components/listing-image';
 import { ListingStatusBadge } from '@/components/listing-status-badge';
@@ -138,6 +138,100 @@ export default async function ListingDetailPage({
                   </p>
                 </div>
               </div>
+
+              {listing.condition && (
+                <div className="flex items-center gap-3 text-sm text-ink-2">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cream-dark">
+                    <Info className="h-4 w-4 text-ink-3" />
+                  </span>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.16em] text-ink-3">
+                      Condition
+                    </p>
+                    <p className="font-medium text-ink">{listing.condition}</p>
+                  </div>
+                </div>
+              )}
+
+              {listing.pickup_location && (
+                <div className="flex items-center gap-3 text-sm text-ink-2">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cream-dark">
+                    <MapPin className="h-4 w-4 text-ink-3" />
+                  </span>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.16em] text-ink-3">
+                      Pickup Location
+                    </p>
+                    <p className="font-medium text-ink">{listing.pickup_location}</p>
+                  </div>
+                </div>
+              )}
+
+              {listing.item_type === 'For sale' && (
+                <div className="flex items-center gap-3 text-sm text-ink-2">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cream-dark">
+                    <Coins className="h-4 w-4 text-ink-3" />
+                  </span>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.16em] text-ink-3">
+                      Negotiable
+                    </p>
+                    <p className="font-medium text-ink">
+                      {listing.negotiable ? 'Yes, price negotiable' : 'No, fixed price'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {listing.item_type === 'Borrow' && (
+                <>
+                  {listing.borrow_type && (
+                    <div className="flex items-center gap-3 text-sm text-ink-2">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cream-dark">
+                        <Info className="h-4 w-4 text-ink-3" />
+                      </span>
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-ink-3">
+                          Borrow Type
+                        </p>
+                        <p className="font-medium text-ink">
+                          {listing.borrow_type === 'request' ? 'Looking to borrow' : 'Lending out'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {listing.borrow_duration && (
+                    <div className="flex items-center gap-3 text-sm text-ink-2">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cream-dark">
+                        <Clock className="h-4 w-4 text-ink-3" />
+                      </span>
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-ink-3">
+                          Max Duration
+                        </p>
+                        <p className="font-medium text-ink">{listing.borrow_duration}</p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {listing.contact_method && (
+                <div className="flex items-center gap-3 text-sm text-ink-2">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cream-dark">
+                    <MessageSquare className="h-4 w-4 text-ink-3" />
+                  </span>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.16em] text-ink-3">
+                      Preferred Contact
+                    </p>
+                    <p className="font-medium text-ink capitalize">
+                      {listing.contact_method === 'email' ? 'Institutional Email' : listing.contact_method === 'phone' ? 'WhatsApp / Phone' : 'In-App Chat'}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="mt-8">
