@@ -35,6 +35,12 @@ type EditListingFormProps = {
     itemType: string;
     price: string;
     imageUrl: string | null;
+    condition: string;
+    pickupLocation: string;
+    negotiable: boolean;
+    borrowDuration: string;
+    borrowType: string;
+    contactMethod: string;
   };
 };
 
@@ -156,6 +162,33 @@ export function EditListingForm({ listing }: EditListingFormProps) {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="condition">Condition</Label>
+            <select
+              id="condition"
+              name="condition"
+              defaultValue={listing.condition}
+              className="h-12 w-full rounded-xl border border-stone-light px-4 bg-white text-sm text-ink outline-none transition focus:border-ink"
+            >
+              <option value="">Select condition</option>
+              <option value="New">New</option>
+              <option value="Like New">Like New</option>
+              <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pickupLocation">Pickup Location</Label>
+            <Input
+              id="pickupLocation"
+              name="pickupLocation"
+              placeholder="Library Entrance"
+              defaultValue={listing.pickupLocation}
+              className="h-12"
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="ownerName">Your Name</Label>
             <Input
               id="ownerName"
@@ -235,18 +268,92 @@ export function EditListingForm({ listing }: EditListingFormProps) {
             </div>
 
             {listingType === 'For sale' ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="price">Price</Label>
                 <Input
                   id="price"
                   name="price"
                   defaultValue={listing.price}
-                  inputMode="numeric"
+                  placeholder="₹600"
                   required
                   className="h-12"
                 />
+                <label className="flex items-center gap-2 text-sm text-ink-2">
+                  <input
+                    type="checkbox"
+                    name="negotiable"
+                    defaultChecked={listing.negotiable}
+                  />
+                  Negotiable
+                </label>
               </div>
             ) : null}
+          </div>
+
+          {listingType === 'Borrow' && (
+            <div className="space-y-4 rounded-xl border border-stone-light p-4">
+              <h3 className="font-medium text-ink">
+                Borrow Details
+              </h3>
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="borrowType"
+                    value="request"
+                    defaultChecked={listing.borrowType === 'request'}
+                  />
+                  I need to borrow this
+                </label>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="borrowType"
+                    value="offer"
+                    defaultChecked={listing.borrowType !== 'request'}
+                  />
+                  I am lending this out
+                </label>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="borrowDuration">
+                  Maximum Duration
+                </Label>
+
+                <Input
+                  id="borrowDuration"
+                  name="borrowDuration"
+                  placeholder="7 days"
+                  defaultValue={listing.borrowDuration}
+                  className="h-12"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <Label htmlFor="contactMethod">
+              Contact Method
+            </Label>
+            <select
+              id="contactMethod"
+              name="contactMethod"
+              defaultValue={listing.contactMethod}
+              className="h-12 w-full rounded-xl border border-stone-light px-4 bg-white text-sm text-ink outline-none transition focus:border-ink"
+            >
+              <option value="email">
+                Share Institutional Email
+              </option>
+              <option value="phone">
+                WhatsApp / Phone
+              </option>
+              <option value="chat">
+                In-App Chat
+              </option>
+            </select>
           </div>
 
           <div
