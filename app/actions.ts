@@ -111,23 +111,12 @@ export async function createListingAction(
   const priceValue = String(formData.get('price') ?? '').trim();
   const imageFile = formData.get('image') as File | null;
 
-  const condition =
-  String(formData.get('condition') ?? '');
-
-const pickupLocation =
-  String(formData.get('pickupLocation') ?? '');
-
-const negotiable =
-  formData.get('negotiable') === 'on';
-
-const borrowDuration =
-  String(formData.get('borrowDuration') ?? '');
-
-const borrowType =
-  String(formData.get('borrowType') ?? '');
-
-const contactMethod =
-  String(formData.get('contactMethod') ?? 'email');
+  const condition = String(formData.get('condition') ?? '');
+  const pickupLocation = String(formData.get('pickupLocation') ?? '');
+  const negotiable = formData.get('negotiable') === 'on';
+  const borrowDuration = String(formData.get('borrowDuration') ?? '');
+  const borrowType = String(formData.get('borrowType') ?? '');
+  const contactMethod = String(formData.get('contactMethod') ?? 'email');
 
   if (!title || !ownerName) {
     return {
@@ -199,11 +188,11 @@ const contactMethod =
       user_id: user.id,
       status: 'available',
       condition,
-  pickup_location: pickupLocation,
-  negotiable,
-  borrow_duration: borrowDuration,
-  borrow_type: borrowType,
-  contact_method: contactMethod,
+      pickup_location: pickupLocation,
+      negotiable,
+      borrow_duration: borrowDuration,
+      borrow_type: borrowType,
+      contact_method: contactMethod,
     })
     .select('id')
     .single();
@@ -373,23 +362,12 @@ export async function updateListingAction(
   _: ListingActionState,
   formData: FormData
 ): Promise<ListingActionState> {
-  const condition =
-  String(formData.get('condition') ?? '');
-
-const pickupLocation =
-  String(formData.get('pickupLocation') ?? '');
-
-const negotiable =
-  formData.get('negotiable') === 'on';
-
-const borrowDuration =
-  String(formData.get('borrowDuration') ?? '');
-
-const borrowType =
-  String(formData.get('borrowType') ?? '');
-
-const contactMethod =
-  String(formData.get('contactMethod') ?? 'email');
+  const condition = String(formData.get('condition') ?? '');
+  const pickupLocation = String(formData.get('pickupLocation') ?? '');
+  const negotiable = formData.get('negotiable') === 'on';
+  const borrowDuration = String(formData.get('borrowDuration') ?? '');
+  const borrowType = String(formData.get('borrowType') ?? '');
+  const contactMethod = String(formData.get('contactMethod') ?? 'email');
   const listingId = String(formData.get('listingId') ?? '').trim();
   const { supabase, user, listing, error: ownershipError } =
     await getOwnedListing(listingId);
@@ -493,11 +471,11 @@ const contactMethod =
       image_url: imageUrl,
       tag_class_name: getTagClassName(itemType),
       condition,
-  pickup_location: pickupLocation,
-  negotiable,
-  borrow_duration: borrowDuration,
-  borrow_type: borrowType,
-  contact_method: contactMethod,
+      pickup_location: pickupLocation,
+      negotiable,
+      borrow_duration: borrowDuration,
+      borrow_type: borrowType,
+      contact_method: contactMethod,
     })
     .eq('id', listingId);
 
