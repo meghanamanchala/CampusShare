@@ -63,7 +63,7 @@ export function getListingDisplayPrice(
 ) {
   switch ((itemType ?? '').toLowerCase()) {
     case 'for sale':
-      return price ? `Rs ${price}` : 'Open';
+      return price ? `₹${price}` : 'Open';
 
     case 'borrow':
       return 'Borrow';
@@ -94,7 +94,7 @@ export const demoListings: CampusListing[] = [
     owner: 'Rahul M.',
     time: '35 mins ago',
     tag: 'For sale',
-    price: 'Rs 600',
+    price: '₹600',
     tagClassName: 'bg-[#f5f0e8] text-[#6b6859]',
     status: 'available',
   },
