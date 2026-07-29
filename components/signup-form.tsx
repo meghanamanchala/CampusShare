@@ -96,27 +96,50 @@ export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
         throw new Error('Failed to create user account');
       }
 
-      // Step 2: Create profile
+      // Step 2: Auto-detect campus domain
+      const emailDomain = formData.email.split('@')[1]?.toLowerCase();
+      let campusId: string | null = null;
+      let campusName: string | null = null;
+
+      if (emailDomain) {
+        const { data: campus } = await supabase
+          .from('campuses')
+          .select('id, name')
+          .eq('domain', emailDomain)
+          .maybeSingle();
+
+        if (campus) {
+          campusId = campus.id;
+          campusName = campus.name;
+        } else {
+          campusName = emailDomain.split('.')[0].toUpperCase();
+        }
+      }
+
+      // Step 3: Create profile with auto-verification
       const { error: profileError } = await supabase.from('profiles').insert({
         id: authData.user.id,
         email: formData.email,
         full_name: formData.fullName,
-        is_verified: false,
+        is_verified: true,
+        campus_id: campusId,
         is_admin: false,
       });
 
       if (profileError) {
         console.error('Profile creation error:', profileError);
-        // Don't throw, profile might already exist
       }
 
-      // Step 3: Create verification record
+      // Step 4: Create approved verification record
       const { error: verificationError } = await supabase
         .from('user_verifications')
         .insert({
           user_id: authData.user.id,
           email: formData.email,
-          status: 'pending',
+          status: 'approved',
+          campus_id: campusId,
+          campus_name: campusName,
+          verified_at: new Date().toISOString(),
         });
 
       if (verificationError) {
@@ -124,18 +147,14 @@ export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
         throw verificationError;
       }
 
-      // Step 4: Sign out the newly created user (they can't access anything yet)
-      await supabase.auth.signOut();
-
       setStatus('success');
       setMessage(
-        '✅ Signup successful! Your campus email is now pending admin verification. You will be able to sign in once approved.'
+        '✅ Signup & verification successful! Redirecting to feed...'
       );
 
-      // Redirect after 2 seconds
       setTimeout(() => {
-    router.push(redirectTo as any);  // Cast to bypass strict typedRoutes
-  }, 2000);
+        router.push('/feed');
+      }, 1000);
 
     } catch (error) {
       setStatus('error');

@@ -494,3 +494,76 @@ export async function updateListingAction(
     listingId,
   };
 }
+
+export async function updateProfileAction(
+  _: SimpleActionState,
+  formData: FormData
+): Promise<SimpleActionState> {
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user) {
+    return {
+      status: 'error',
+      message: 'Sign in to update your profile.',
+    };
+  }
+
+  const fullName = String(formData.get('fullName') ?? '').trim();
+  const phoneNumber = String(formData.get('phoneNumber') ?? '').trim();
+  const bio = String(formData.get('bio') ?? '').trim();
+
+  if (!fullName) {
+    return {
+      status: 'error',
+      message: 'Full name is required.',
+    };
+  }
+
+  let error;
+  try {
+    const { error: dbError } = await supabase
+      .from('profiles')
+      .update({
+        full_name: fullName,
+        phone_number: phoneNumber || null,
+        bio: bio || null,
+      })
+      .eq('id', user.id);
+    
+    error = dbError;
+
+    if (dbError && (
+      dbError.message?.includes('column') || 
+      dbError.code === '42703'
+    )) {
+      console.warn('Optional columns phone_number/bio not found. Retrying with full_name only.');
+      const { error: fallbackError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: fullName,
+        })
+        .eq('id', user.id);
+      
+      error = fallbackError;
+    }
+  } catch (err: any) {
+    error = err;
+  }
+
+  if (error) {
+    return {
+      status: 'error',
+      message: `Failed to update profile: ${error.message}`,
+    };
+  }
+
+  revalidatePath('/profile');
+  revalidatePath('/feed');
+  revalidatePath('/my-listings');
+
+  return {
+    status: 'success',
+    message: 'Profile updated successfully.',
+  };
+}
+

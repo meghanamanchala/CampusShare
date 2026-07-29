@@ -34,12 +34,20 @@ export default function SiteMobileMenu({
           <div className="mx-4 rounded-3xl border border-stone-light bg-white p-4 shadow-soft">
             <nav className="flex flex-col gap-2">
               {showMyListings && (
-                <a
-                  href="/my-listings"
-                  className="rounded-xl px-4 py-3 hover:bg-stone-light"
-                >
-                  My Listings
-                </a>
+                <>
+                  <a
+                    href="/profile"
+                    className="rounded-xl px-4 py-3 hover:bg-stone-light"
+                  >
+                    Profile
+                  </a>
+                  <a
+                    href="/my-listings"
+                    className="rounded-xl px-4 py-3 hover:bg-stone-light"
+                  >
+                    My Listings
+                  </a>
+                </>
               )}
 
               <a
