@@ -65,58 +65,62 @@ export function LoginForm({ redirectTo = '/feed' }: LoginFormProps) {
       }
 
 
-      // Step 2: Check if user is verified
-      const { data: verificationData, error: verificationError } = await supabase
+      // Step 2: Check or auto-approve user verification
+      const { data: verificationData } = await supabase
         .from('user_verifications')
         .select('status')
         .eq('user_id', authData.user.id)
-        .single();
+        .maybeSingle();
 
-      if (verificationError) {
-        console.error('Verification check error:', verificationError);
-        // If no verification record, sign them out
-        await supabase.auth.signOut();
-        setStatus('pending');
-        setMessage(
-          '⏳ Your campus email is still pending admin verification. Please wait for approval from the admin team.'
-        );
-        return;
-      }
+      if (!verificationData || verificationData.status === 'pending') {
+        const emailDomain = authData.user.email?.split('@')[1]?.toLowerCase();
+        let campusId: string | null = null;
+        let campusName: string | null = null;
 
+        if (emailDomain) {
+          const { data: campus } = await supabase
+            .from('campuses')
+            .select('id, name')
+            .eq('domain', emailDomain)
+            .maybeSingle();
 
-      // Step 3: Check verification status
-      if (verificationData.status === 'pending') {
-        await supabase.auth.signOut();
-        setStatus('pending');
-        setMessage(
-          '⏳ Your campus email is still pending admin verification. You will be able to sign in once approved.'
-        );
-        return;
-      }
+          if (campus) {
+            campusId = campus.id;
+            campusName = campus.name;
+          } else {
+            campusName = emailDomain.split('.')[0].toUpperCase();
+          }
+        }
 
-      if (verificationData.status === 'rejected') {
+        await supabase.from('user_verifications').upsert({
+          user_id: authData.user.id,
+          email: authData.user.email,
+          status: 'approved',
+          campus_id: campusId,
+          campus_name: campusName,
+          verified_at: new Date().toISOString(),
+        });
+
+        await supabase
+          .from('profiles')
+          .update({
+            is_verified: true,
+            campus_id: campusId,
+          })
+          .eq('id', authData.user.id);
+      } else if (verificationData.status === 'rejected') {
         await supabase.auth.signOut();
         setStatus('rejected');
         setMessage(
-          '❌ Your signup was rejected by the admin team. Please contact support@campusshare.local for more information.'
+          '❌ Your signup was rejected by the admin team. Please contact support@campusshare.local.'
         );
         return;
       }
 
-      if (verificationData.status !== 'approved') {
-        await supabase.auth.signOut();
-        setStatus('error');
-        setMessage('Unknown verification status. Please contact support.');
-        return;
-      }
-
-      // Step 4: User is verified and approved - let middleware handle the redirect
-      // Middleware will check if user is admin and redirect to /admin/dashboard if true
       setStatus('success');
       setMessage('✅ Sign in successful! Redirecting...');
 
       setTimeout(() => {
-        // Just redirect to /feed - middleware will intercept and redirect to /admin/dashboard if needed
         router.push('/feed');
       }, 1000);
 
