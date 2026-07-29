@@ -9,12 +9,20 @@ import {
 } from '@/lib/listings';
 
 type FeedPageProps = {
-  searchParams: Promise<{ type?: string }>;
+  searchParams: Promise<{
+    type?: string;
+    q?: string;
+    status?: string;
+    sort?: string;
+  }>;
 };
 
 export default async function FeedPage({ searchParams }: FeedPageProps) {
-  const { type } = await searchParams;
+  const { type, q, status, sort } = await searchParams;
   const activeFilter = type ?? 'all';
+  const searchQuery = (q ?? '').trim();
+  const statusFilter = status ?? 'all';
+  const sortOption = sort ?? 'newest';
   const itemType = itemTypeFromFilter(type);
 
   const supabase = await createSupabaseServerClient();
@@ -25,11 +33,28 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
   let query = supabase
     .from('listings')
     .select(LISTING_SELECT_FIELDS)
-    .neq('status', 'removed')
-    .order('created_at', { ascending: false });
+    .neq('status', 'removed');
+
+  if (statusFilter === 'available') {
+    query = query.eq('status', 'available');
+  }
 
   if (itemType) {
     query = query.eq('item_type', itemType);
+  }
+
+  if (searchQuery) {
+    query = query.or(
+      `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,pickup_location.ilike.%${searchQuery}%`
+    );
+  }
+
+  if (sortOption === 'price-asc') {
+    query = query.order('price', { ascending: true, nullsFirst: false });
+  } else if (sortOption === 'price-desc') {
+    query = query.order('price', { ascending: false, nullsFirst: false });
+  } else {
+    query = query.order('created_at', { ascending: false });
   }
 
   const { data: listingsData, error: listingsError } = await query;
@@ -53,12 +78,17 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
             Browse <span className="italic text-ink-3">live listings</span>
           </h1>
           <p className="mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-ink-2">
-            Filter by type and claim items while they are still available.
+            Search items, filter by category, and claim what you need on campus.
           </p>
         </div>
 
         <div className="mt-8">
-          <FeedFilters activeFilter={activeFilter} />
+          <FeedFilters
+            activeFilter={activeFilter}
+            searchQuery={searchQuery}
+            statusFilter={statusFilter}
+            sortOption={sortOption}
+          />
         </div>
 
         <div className="mt-8 grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -72,9 +102,11 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
               <p className="mt-2 text-sm text-ink-3">
                 {listingsError
                   ? 'Unable to load listings right now.'
-                  : itemType
-                    ? `No ${itemType.toLowerCase()} listings are live yet.`
-                    : 'Be the first student to post an item.'}
+                  : searchQuery
+                    ? `No items match "${searchQuery}". Try a different keyword.`
+                    : itemType
+                      ? `No ${itemType.toLowerCase()} listings are live yet.`
+                      : 'Be the first student to post an item.'}
               </p>
               {isSignedIn ? (
                 <a

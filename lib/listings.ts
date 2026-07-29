@@ -32,6 +32,14 @@ export const LISTING_TYPE_FILTERS = [
 
 export type ListingTypeFilter = (typeof LISTING_TYPE_FILTERS)[number]['value'];
 
+export const SORT_OPTIONS = [
+  { label: 'Newest first', value: 'newest' },
+  { label: 'Price: Low to High', value: 'price-asc' },
+  { label: 'Price: High to Low', value: 'price-desc' },
+] as const;
+
+export type SortOption = (typeof SORT_OPTIONS)[number]['value'];
+
 export function itemTypeFromFilter(
   filter: string | undefined
 ): string | null {
