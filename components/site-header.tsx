@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { SiteLogo } from '@/components/site-logo';
 import SiteMobileMenu from '@/components/site-mobile-menu';
 import { cn } from '@/lib/utils';
 
@@ -38,15 +39,8 @@ export function SiteHeader({
     <header className="sticky top-0 z-50 border-b border-stone-light/70 bg-cream/85 backdrop-blur-md transition-all">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}
-        <a
-          href="/"
-          className="flex items-center gap-2 sm:gap-3 font-bold text-lg sm:text-[1.35rem] tracking-tight text-ink transition hover:opacity-90"
-        >
-          <span className="relative flex h-3 w-3 items-center justify-center">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
-          </span>
-          <span>Campus<span className="font-serif italic text-ink-3">Share</span></span>
+        <a href="/" className="transition hover:opacity-90">
+          <SiteLogo />
         </a>
 
         {/* Mobile Menu */}
