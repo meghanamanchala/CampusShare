@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextRequest, NextResponse } from 'next/server';
 
-const PUBLIC_ROUTES = ['/', '/auth/signup', '/auth/login', '/auth/pending'];
+const PUBLIC_ROUTES = ['/', '/feed', '/auth/signup', '/auth/login', '/auth/pending'];
 const AUTH_ROUTES = ['/auth/signup', '/auth/login'];
 const ADMIN_ROUTES = ['/admin'];
 
@@ -72,11 +72,6 @@ export async function middleware(request: NextRequest) {
       isAdmin = profile?.is_admin ?? false;
     } catch {
       isAdmin = false;
-    }
-
-    // If user is admin and trying to access /feed, redirect to admin dashboard
-    if (isAdmin && pathname === '/feed') {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
 
     // Check admin routes
