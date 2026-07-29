@@ -22,7 +22,9 @@ export default async function ListingDetailPage({
 }: ListingDetailPageProps) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
-  const { data: sessionData } = await supabase.auth.getSession();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: listing, error } = await supabase
     .from('listings')
@@ -34,7 +36,7 @@ export default async function ListingDetailPage({
     notFound();
   }
 
-  const currentUserId = sessionData.session?.user.id ?? null;
+  const currentUserId = user?.id ?? null;
   const isOwner = currentUserId === listing.user_id;
   const isSignedIn = Boolean(currentUserId);
   const status = listing.status ?? 'available';

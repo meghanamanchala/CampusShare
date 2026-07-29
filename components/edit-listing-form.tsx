@@ -132,7 +132,7 @@ export function EditListingForm({ listing }: EditListingFormProps) {
         </CardDescription>
       </CardHeader>
 
-      <form action={formAction} encType="multipart/form-data">
+      <form action={formAction}>
         <input type="hidden" name="listingId" value={listing.id} />
 
         <CardContent className="space-y-7 px-4 py-6 sm:px-6 sm:py-8">

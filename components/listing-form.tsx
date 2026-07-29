@@ -119,7 +119,7 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
         </CardDescription>
       </CardHeader>
 
-      <form action={formAction} encType="multipart/form-data">
+      <form action={formAction}>
         <CardContent className="space-y-6 px-4 py-5 sm:px-6 sm:py-8">
           <div className="space-y-2">
             <Label htmlFor="title">Item Title</Label>

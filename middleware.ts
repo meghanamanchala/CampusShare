@@ -19,6 +19,7 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
+    // If environment variables are missing on Vercel, allow static/public fallback rather than crashing with 500
     console.error('Middleware: Missing Supabase environment variables');
     return response;
   }
@@ -47,6 +48,7 @@ export async function middleware(request: NextRequest) {
 
     // Allow public routes
     if (PUBLIC_ROUTES.includes(pathname)) {
+      // If logged in and trying to access auth pages, redirect to feed
       if (user && AUTH_ROUTES.includes(pathname)) {
         return NextResponse.redirect(new URL('/feed', request.url));
       }
@@ -118,4 +120,4 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
-};
+};

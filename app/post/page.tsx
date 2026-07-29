@@ -5,12 +5,14 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export default async function PostPage() {
   const supabase = await createSupabaseServerClient();
-  const { data: sessionData } = await supabase.auth.getSession();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const isSignedIn = Boolean(sessionData.session?.user);
+  const isSignedIn = Boolean(user);
 
   const defaultOwnerName =
-    sessionData.session?.user.email
+    user?.email
       ?.split('@')[0]
       .replace(/[._-]+/g, ' ') ?? '';
 
