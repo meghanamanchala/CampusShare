@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { getListingInitials } from '@/lib/listing-utils';
+import { Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type ListingImageProps = {
@@ -21,8 +21,6 @@ export function ListingImage({
   priority = false,
   sizes = '(max-width: 768px) 100vw, 33vw',
 }: ListingImageProps) {
-  const initials = getListingInitials(title);
-
   if (!src) {
     return (
       <div
@@ -31,9 +29,7 @@ export function ListingImage({
           className
         )}
       >
-        <span className="font-serif text-3xl font-semibold tracking-tight text-ink-2/70 sm:text-4xl md:text-5xl">
-          {initials}
-        </span>
+        <Package className="h-12 w-12 text-ink-3/70 stroke-[1.5]" />
       </div>
     );
   }

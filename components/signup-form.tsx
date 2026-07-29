@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const ALLOWED_CAMPUS_DOMAINS = [
@@ -149,7 +149,7 @@ export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
 
       setStatus('success');
       setMessage(
-        '✅ Signup & verification successful! Redirecting to feed...'
+        'Signup & verification successful! Redirecting to feed...'
       );
 
       setTimeout(() => {
@@ -257,13 +257,18 @@ export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
         {/* Status Message */}
         {message && (
           <div
-            className={`p-3 rounded-lg text-sm ${
+            className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
               status === 'error'
                 ? 'bg-red-50 text-red-800 border border-red-200'
                 : 'bg-green-50 text-green-800 border border-green-200'
             }`}
           >
-            {message}
+            {status === 'error' ? (
+              <AlertCircle className="h-4 w-4 shrink-0" />
+            ) : (
+              <CheckCircle className="h-4 w-4 shrink-0" />
+            )}
+            <span>{message}</span>
           </div>
         )}
 

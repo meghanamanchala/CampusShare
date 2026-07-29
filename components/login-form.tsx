@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 type LoginFormProps = {
@@ -112,13 +112,13 @@ export function LoginForm({ redirectTo = '/feed' }: LoginFormProps) {
         await supabase.auth.signOut();
         setStatus('rejected');
         setMessage(
-          '❌ Your signup was rejected by the admin team. Please contact support@campusshare.local.'
+          'Your signup was rejected by the admin team. Please contact support@campusshare.local.'
         );
         return;
       }
 
       setStatus('success');
-      setMessage('✅ Sign in successful! Redirecting...');
+      setMessage('Sign in successful! Redirecting...');
 
       setTimeout(() => {
         router.push('/feed');
@@ -180,7 +180,7 @@ export function LoginForm({ redirectTo = '/feed' }: LoginFormProps) {
         {/* Status Message */}
         {message && (
           <div
-            className={`p-3 rounded-lg text-sm ${
+            className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
               status === 'error'
                 ? 'bg-red-50 text-red-800 border border-red-200'
                 : status === 'pending'
@@ -190,7 +190,12 @@ export function LoginForm({ redirectTo = '/feed' }: LoginFormProps) {
                 : 'bg-green-50 text-green-800 border border-green-200'
             }`}
           >
-            {message}
+            {status === 'error' || status === 'rejected' ? (
+              <AlertCircle className="h-4 w-4 shrink-0" />
+            ) : (
+              <CheckCircle className="h-4 w-4 shrink-0" />
+            )}
+            <span>{message}</span>
           </div>
         )}
 
