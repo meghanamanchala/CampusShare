@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar, Tag, User, Clock, Info, MapPin, MessageSquare, Coins } from 'lucide-react';
 import { ClaimListingButton } from '@/components/claim-listing-button';
 import { MessageButton } from '@/components/message-button';
-import { ListingImage } from '@/components/listing-image';
+import { ListingImageCarousel } from '@/components/listing-image-carousel';
 import { ListingStatusBadge } from '@/components/listing-status-badge';
 import { MyListingActions } from '@/components/my-listing-actions';
 import { SiteHeader } from '@/components/site-header';
@@ -64,18 +64,19 @@ export default async function ListingDetailPage({
         </a>
 
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          <div className="relative overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-stone-light bg-white shadow-soft">
-            <ListingImage
-  src={listing.image_url}
-  alt={listing.title ?? 'Listing image'}
-  title={listing.title ?? 'Listing'}
-  priority
-  className="h-[550px] w-full"
-  imageClassName="object-contain"
-  sizes="(max-width: 1024px) 100vw, 60vw"
-/>
+          <div className="relative">
+            <ListingImageCarousel
+              images={
+                Array.isArray(listing.image_urls) && listing.image_urls.length > 0
+                  ? listing.image_urls
+                  : listing.image_url
+                  ? [listing.image_url]
+                  : []
+              }
+              title={listing.title ?? 'Listing'}
+            />
             {status === 'claimed' ? (
-              <div className="absolute inset-0 bg-ink/25" />
+              <div className="pointer-events-none absolute inset-0 rounded-[1.5rem] sm:rounded-[2rem] bg-ink/25" />
             ) : null}
           </div>
 

@@ -109,7 +109,12 @@ export async function createListingAction(
   const description = String(formData.get('description') ?? '').trim();
   const itemType = String(formData.get('itemType') ?? 'Free').trim();
   const priceValue = String(formData.get('price') ?? '').trim();
-  const imageFile = formData.get('image') as File | null;
+  const rawImageFiles = formData.getAll('images') as File[];
+  const singleImageFile = formData.get('image') as File | null;
+  const imageFiles = rawImageFiles.filter((f) => f && f.size > 0);
+  if (imageFiles.length === 0 && singleImageFile && singleImageFile.size > 0) {
+    imageFiles.push(singleImageFile);
+  }
 
   const condition = String(formData.get('condition') ?? '');
   const pickupLocation = String(formData.get('pickupLocation') ?? '');
@@ -139,26 +144,25 @@ export async function createListingAction(
     };
   }
 
-  if (imageFile && imageFile.size > 0) {
-    const imageError = validateListingImage(imageFile);
+  const imageUrls: string[] = [];
+
+  for (let i = 0; i < imageFiles.length; i++) {
+    const file = imageFiles[i];
+    const imageError = validateListingImage(file);
 
     if (imageError) {
       return {
         status: 'error',
-        message: imageError,
+        message: `Image ${i + 1}: ${imageError}`,
       };
     }
-  }
 
-  let imageUrl: string | null = null;
-
-  if (imageFile && imageFile.size > 0) {
-    const fileExt = imageFile.name.split('.').pop();
-    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}-${Date.now()}-${i}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from('listing-images')
-      .upload(fileName, imageFile);
+      .upload(fileName, file);
 
     if (uploadError) {
       return {
@@ -171,8 +175,12 @@ export async function createListingAction(
       .from('listing-images')
       .getPublicUrl(fileName);
 
-    imageUrl = data.publicUrl;
+    if (data?.publicUrl) {
+      imageUrls.push(data.publicUrl);
+    }
   }
+
+  const primaryImageUrl = imageUrls[0] ?? null;
 
   const { data: listing, error } = await supabase
     .from('listings')
@@ -183,7 +191,8 @@ export async function createListingAction(
       created_at: new Date().toISOString(),
       item_type: itemType,
       price: itemType === 'For sale' ? priceValue : null,
-      image_url: imageUrl,
+      image_url: primaryImageUrl,
+      image_urls: imageUrls,
       tag_class_name: getTagClassName(itemType),
       user_id: user.id,
       status: 'available',

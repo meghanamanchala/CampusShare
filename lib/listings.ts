@@ -17,12 +17,13 @@ export type ListingRow = {
   icon?: string | null;
   tag_class_name: string | null;
   image_url: string | null;
+  image_urls?: string[] | null;
   status?: ListingStatus | null;
   claimed_by?: string | null;
   user_id?: string | null;
 };
 export const LISTING_SELECT_FIELDS =
-'id,title,description,owner_name,created_at,item_type,price,icon,tag_class_name,image_url,status,claimed_by,user_id,condition,pickup_location,negotiable,borrow_duration,borrow_type,contact_method';
+'id,title,description,owner_name,created_at,item_type,price,icon,tag_class_name,image_url,image_urls,status,claimed_by,user_id,condition,pickup_location,negotiable,borrow_duration,borrow_type,contact_method';
 export const LISTING_TYPE_FILTERS = [
   { label: 'All', value: 'all' },
   { label: 'Free', value: 'free' },

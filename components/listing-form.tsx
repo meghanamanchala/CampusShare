@@ -40,9 +40,8 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
 
   const [listingType, setListingType] = useState('Free');
   const [description, setDescription] = useState('');
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<{ file: File; url: string }[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
-  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
 
   useEffect(() => {
     if (state.status === 'success' && state.listingId) {
@@ -52,55 +51,58 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
 
   useEffect(() => {
     return () => {
-      if (imagePreview) {
-        URL.revokeObjectURL(imagePreview);
-      }
+      selectedFiles.forEach((f) => URL.revokeObjectURL(f.url));
     };
-  }, [imagePreview]);
+  }, [selectedFiles]);
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
 
-    if (!file) {
-      setImagePreview(null);
-      setSelectedFileName(null);
-      setImageError(null);
+    if (selectedFiles.length + files.length > 5) {
+      setImageError('You can upload a maximum of 5 images per listing.');
       return;
     }
 
-    const validationError = validateListingImage(file);
+    const newEntries: { file: File; url: string }[] = [];
 
-    if (validationError) {
-      setImageError(validationError);
-      setImagePreview(null);
-      setSelectedFileName(null);
-      event.target.value = '';
-      return;
-    }
-
-    setImageError(null);
-    setSelectedFileName(file.name);
-    setImagePreview((current) => {
-      if (current) {
-        URL.revokeObjectURL(current);
+    for (const file of files) {
+      const validationError = validateListingImage(file);
+      if (validationError) {
+        setImageError(validationError);
+        return;
       }
-
-      return URL.createObjectURL(file);
-    });
-  }
-
-  function clearImage() {
-    if (imagePreview) {
-      URL.revokeObjectURL(imagePreview);
+      newEntries.push({ file, url: URL.createObjectURL(file) });
     }
 
-    setImagePreview(null);
-    setSelectedFileName(null);
     setImageError(null);
-
+    setSelectedFiles((prev) => [...prev, ...newEntries]);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  }
+
+  function removeImage(index: number) {
+    setSelectedFiles((prev) => {
+      const target = prev[index];
+      if (target) {
+        URL.revokeObjectURL(target.url);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    formData.delete('images');
+    formData.delete('image');
+
+    selectedFiles.forEach(({ file }) => {
+      formData.append('images', file);
+    });
+
+    formAction(formData);
   }
 
   return (
@@ -119,7 +121,7 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
         </CardDescription>
       </CardHeader>
 
-      <form action={formAction}>
+      <form onSubmit={handleSubmit}>
         <CardContent className="space-y-6 px-4 py-5 sm:px-6 sm:py-8">
           <div className="space-y-2">
             <Label htmlFor="title">Item Title</Label>
@@ -295,38 +297,60 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
           </div>
 
           <div className="space-y-3">
-            <Label htmlFor="image">Item Photo</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="image">Item Photos ({selectedFiles.length}/5)</Label>
+              <span className="text-xs text-ink-3">Upload up to 5 photos</span>
+            </div>
 
             <input
               ref={fileInputRef}
               id="image"
-              name="image"
+              name="images"
               type="file"
+              multiple
               accept="image/jpeg,image/png,image/webp,image/gif"
               className="sr-only"
               onChange={handleImageChange}
             />
 
-            {imagePreview ? (
-              <div className="overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-stone-light bg-cream-dark">
-                <div className="relative max-h-[500px] w-full">
-                  <img
-                    src={imagePreview}
-                    alt="Selected item preview"
-                    className="max-h-[500px] w-full object-contain"
-                  />
+            {selectedFiles.length > 0 ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {selectedFiles.map((item, index) => (
+                    <div
+                      key={`${item.url}-${index}`}
+                      className="group relative h-32 w-full overflow-hidden rounded-2xl border border-stone-light bg-cream-dark shadow-sm"
+                    >
+                      <img
+                        src={item.url}
+                        alt={`Photo ${index + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute right-2 top-2 rounded-full bg-ink/80 p-1.5 text-cream transition hover:bg-red-600"
+                        aria-label={`Remove photo ${index + 1}`}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="absolute bottom-1.5 left-2 rounded-md bg-ink/70 px-1.5 py-0.5 text-[10px] font-semibold text-cream">
+                        {index === 0 ? 'Primary' : `#${index + 1}`}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {selectedFiles.length < 5 && (
                   <button
                     type="button"
-                    onClick={clearImage}
-                    className="absolute right-3 top-3 rounded-full bg-ink/80 p-2 text-cream transition hover:bg-ink"
-                    aria-label="Remove selected image"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-stone bg-cream/40 py-3 text-xs font-semibold text-ink transition hover:bg-cream"
                   >
-                    <X className="h-4 w-4" />
+                    <ImagePlus className="h-4 w-4" />
+                    Add More Photos ({5 - selectedFiles.length} remaining)
                   </button>
-                </div>
-                <p className="break-all px-4 py-3 text-sm text-ink-3">
-                  {selectedFileName}
-                </p>
+                )}
               </div>
             ) : (
               <button
@@ -338,10 +362,10 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
                   <ImagePlus className="h-5 w-5 text-ink-2" />
                 </span>
                 <span className="mt-4 text-sm font-medium text-ink">
-                  Upload a photo
+                  Upload Item Photos (Up to 5)
                 </span>
                 <span className="mt-1 text-xs text-ink-3">
-                  JPEG, PNG, WebP, or GIF up to 5 MB
+                  JPEG, PNG, WebP, or GIF up to 5 MB each
                 </span>
               </button>
             )}
