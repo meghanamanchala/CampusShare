@@ -36,6 +36,12 @@ export default function SiteMobileMenu({
               {showMyListings && (
                 <>
                   <a
+                    href="/messages"
+                    className="rounded-xl px-4 py-3 hover:bg-stone-light"
+                  >
+                    Messages
+                  </a>
+                  <a
                     href="/profile"
                     className="rounded-xl px-4 py-3 hover:bg-stone-light"
                   >

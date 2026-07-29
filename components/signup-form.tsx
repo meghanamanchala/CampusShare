@@ -53,11 +53,9 @@ export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
 
     const domain = formData.email.split('@')[1]?.toLowerCase();
 
-    if (!domain || !ALLOWED_CAMPUS_DOMAINS.includes(domain)) {
+    if (!domain || !domain.includes('.')) {
       setStatus('error');
-      setMessage(
-        'Please use a valid campus email address. Supported domains: iitd.ac.in, vitstudent.ac.in, bits-pilani.ac.in, apollouniversity.edu.in'
-      );
+      setMessage('Please enter a valid email address with a domain (e.g. student@iitd.ac.in)');
       return;
     }
 
@@ -96,32 +94,33 @@ export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
         throw new Error('Failed to create user account');
       }
 
-      // Step 2: Auto-detect campus domain
+      // Step 2: Auto-detect campus domain in Database or trusted domain list
       const emailDomain = formData.email.split('@')[1]?.toLowerCase();
       let campusId: string | null = null;
       let campusName: string | null = null;
 
-      if (emailDomain) {
-        const { data: campus } = await supabase
-          .from('campuses')
-          .select('id, name')
-          .eq('domain', emailDomain)
-          .maybeSingle();
+      const { data: campus } = await supabase
+        .from('campuses')
+        .select('id, name, domain')
+        .eq('domain', emailDomain)
+        .maybeSingle();
 
-        if (campus) {
-          campusId = campus.id;
-          campusName = campus.name;
-        } else {
-          campusName = emailDomain.split('.')[0].toUpperCase();
-        }
+      if (campus) {
+        campusId = campus.id;
+        campusName = campus.name;
+      } else {
+        campusName = emailDomain.split('.')[0].toUpperCase();
       }
 
-      // Step 3: Create profile with auto-verification
+      const isAutoApproved = Boolean(campus) || ALLOWED_CAMPUS_DOMAINS.includes(emailDomain);
+      const verificationStatus = isAutoApproved ? 'approved' : 'pending';
+
+      // Step 3: Create profile with verification status
       const { error: profileError } = await supabase.from('profiles').insert({
         id: authData.user.id,
         email: formData.email,
         full_name: formData.fullName,
-        is_verified: true,
+        is_verified: isAutoApproved,
         campus_id: campusId,
         is_admin: false,
       });
@@ -130,16 +129,16 @@ export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
         console.error('Profile creation error:', profileError);
       }
 
-      // Step 4: Create approved verification record
+      // Step 4: Create verification record
       const { error: verificationError } = await supabase
         .from('user_verifications')
         .insert({
           user_id: authData.user.id,
           email: formData.email,
-          status: 'approved',
+          status: verificationStatus,
           campus_id: campusId,
           campus_name: campusName,
-          verified_at: new Date().toISOString(),
+          verified_at: isAutoApproved ? new Date().toISOString() : null,
         });
 
       if (verificationError) {
@@ -148,14 +147,18 @@ export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
       }
 
       setStatus('success');
-      setMessage(
-        'Signup & verification successful! Redirecting to feed...'
-      );
 
-      setTimeout(() => {
-        router.push('/feed');
-      }, 1000);
-
+      if (isAutoApproved) {
+        setMessage('✅ Campus Email Verified! Instant access granted. Redirecting to feed...');
+        setTimeout(() => {
+          router.push('/feed');
+        }, 1200);
+      } else {
+        setMessage('Signup submitted! Your campus email domain is awaiting admin review.');
+        setTimeout(() => {
+          router.push('/auth/pending');
+        }, 1500);
+      }
     } catch (error) {
       setStatus('error');
       const errorMessage = error instanceof Error ? error.message : 'Signup failed. Please try again.';
@@ -283,8 +286,7 @@ export function SignupForm({ redirectTo = '/auth/pending' }: SignupFormProps) {
 
         {/* Terms & Conditions */}
         <p className="text-xs text-gray-500 text-center">
-          By signing up, you agree to our Terms of Service and Privacy Policy.
-          Your account will need admin verification before you can access the platform.
+          By signing up, you agree to our Terms of Service. Verified campus email domains get instant access. Unregistered campus domains are reviewed by admins.
         </p>
       </form>
     </div>

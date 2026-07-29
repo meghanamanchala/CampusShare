@@ -567,3 +567,159 @@ export async function updateProfileAction(
   };
 }
 
+export type ConversationItem = {
+  id: string;
+  listingId: string;
+  listingTitle: string;
+  listingImage: string | null;
+  otherPartyName: string;
+  lastMessage: string | null;
+  lastMessageTime: string | null;
+  updatedAt: string;
+};
+
+export type MessageItem = {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  content: string;
+  createdAt: string;
+  isMine: boolean;
+};
+
+export async function startConversationAction(
+  listingId: string
+): Promise<{ status: 'success' | 'error'; message: string; conversationId?: string }> {
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user) {
+    return {
+      status: 'error',
+      message: 'Sign in to send messages.',
+    };
+  }
+
+  const { data: listing, error: listingError } = await supabase
+    .from('listings')
+    .select('id, user_id, title')
+    .eq('id', listingId)
+    .maybeSingle();
+
+  if (listingError || !listing) {
+    return {
+      status: 'error',
+      message: 'Listing not found.',
+    };
+  }
+
+  if (listing.user_id === user.id) {
+    return {
+      status: 'error',
+      message: 'You cannot start a conversation on your own listing.',
+    };
+  }
+
+  const { data: existingConv } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('listing_id', listingId)
+    .eq('buyer_id', user.id)
+    .maybeSingle();
+
+  if (existingConv) {
+    return {
+      status: 'success',
+      message: 'Conversation opened.',
+      conversationId: existingConv.id,
+    };
+  }
+
+  const { data: newConv, error: createError } = await supabase
+    .from('conversations')
+    .insert({
+      listing_id: listingId,
+      buyer_id: user.id,
+      seller_id: listing.user_id,
+      updated_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single();
+
+  if (createError) {
+    return {
+      status: 'error',
+      message: `Could not start conversation: ${createError.message}`,
+    };
+  }
+
+  return {
+    status: 'success',
+    message: 'Conversation started.',
+    conversationId: newConv.id,
+  };
+}
+
+export async function sendMessageAction(
+  conversationId: string,
+  content: string
+): Promise<SimpleActionState> {
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user) {
+    return {
+      status: 'error',
+      message: 'Sign in to send messages.',
+    };
+  }
+
+  const trimmed = content.trim();
+  if (!trimmed) {
+    return {
+      status: 'error',
+      message: 'Message cannot be empty.',
+    };
+  }
+
+  const { data: conv, error: convError } = await supabase
+    .from('conversations')
+    .select('id, buyer_id, seller_id')
+    .eq('id', conversationId)
+    .maybeSingle();
+
+  if (convError || !conv || (conv.buyer_id !== user.id && conv.seller_id !== user.id)) {
+    return {
+      status: 'error',
+      message: 'Conversation not found or access denied.',
+    };
+  }
+
+  const now = new Date().toISOString();
+  const { error: msgError } = await supabase.from('messages').insert({
+    conversation_id: conversationId,
+    sender_id: user.id,
+    content: trimmed,
+    created_at: now,
+  });
+
+  if (msgError) {
+    return {
+      status: 'error',
+      message: `Failed to send message: ${msgError.message}`,
+    };
+  }
+
+  await supabase
+    .from('conversations')
+    .update({ updated_at: now })
+    .eq('id', conversationId);
+
+  revalidatePath(`/messages/${conversationId}`);
+  revalidatePath('/messages');
+
+  return {
+    status: 'success',
+    message: 'Message sent.',
+  };
+}
+
+

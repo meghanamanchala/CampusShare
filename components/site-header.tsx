@@ -42,6 +42,12 @@ export function SiteHeader({
           {showMyListings && (
             <>
               <a
+                href="/messages"
+                className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
+              >
+                Messages
+              </a>
+              <a
                 href="/profile"
                 className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
               >

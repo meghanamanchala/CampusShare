@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar, Tag, User, Clock, Info, MapPin, MessageSquare, Coins } from 'lucide-react';
 import { ClaimListingButton } from '@/components/claim-listing-button';
+import { MessageButton } from '@/components/message-button';
 import { ListingImage } from '@/components/listing-image';
 import { ListingStatusBadge } from '@/components/listing-status-badge';
 import { MyListingActions } from '@/components/my-listing-actions';
@@ -266,23 +267,28 @@ export default async function ListingDetailPage({
                 </div>
               ) : status === 'available' ? (
                 isSignedIn ? (
-                  <div className="w-full">
+                  <div className="flex flex-col gap-3 w-full">
                     <ClaimListingButton listingId={listing.id} />
+                    <MessageButton listingId={listing.id} variant="outline" />
                   </div>
                 ) : (
                   <div className="rounded-2xl border border-stone-light bg-cream-dark p-4">
                     <p className="text-sm text-ink-2">
-                      Sign in with your campus email to claim this item.
+                      Sign in with your campus email to claim this item or message the poster.
                     </p>
 
                     <a
                       href="/post"
                       className="mt-4 flex w-full justify-center rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream transition hover:bg-ink-2"
                     >
-                      Sign in to claim
+                      Sign in to claim / chat
                     </a>
                   </div>
                 )
+              ) : isSignedIn ? (
+                <div className="w-full">
+                  <MessageButton listingId={listing.id} variant="outline" />
+                </div>
               ) : null}
 
               <a
