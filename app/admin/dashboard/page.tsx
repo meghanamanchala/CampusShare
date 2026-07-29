@@ -165,7 +165,7 @@ export default function AdminVerificationsPage() {
       if (profileError) throw profileError;
 
       // FIX: Show success message
-      setSuccessMessage(`✅ ${email} has been approved successfully!`);
+      setSuccessMessage(`${email} has been approved successfully!`);
       
       // Refresh data
       await checkAdminAndFetchData();
@@ -196,7 +196,7 @@ export default function AdminVerificationsPage() {
       if (error) throw error;
 
       // FIX: Show success message
-      setSuccessMessage('❌ User has been rejected successfully!');
+      setSuccessMessage('User has been rejected successfully!');
       
       // Refresh data
       await checkAdminAndFetchData();
@@ -256,7 +256,7 @@ export default function AdminVerificationsPage() {
       {/* FIX: Add Success Toast Notification */}
       {successMessage && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-pulse">
-          {successMessage.includes('✅') ? (
+          {successMessage.includes('approved') ? (
             <CheckCircle className="h-5 w-5" />
           ) : (
             <XCircle className="h-5 w-5" />
@@ -462,18 +462,16 @@ export default function AdminVerificationsPage() {
                 )}
 
                 {selectedTab === 'approved' && (
-                  <div className="pt-4 border-t border-gray-200">
-                    <p className="text-sm text-green-700">
-                      ✅ User has been approved and can now sign in.
-                    </p>
+                  <div className="pt-4 border-t border-gray-200 flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
+                    <span>User has been approved and can now sign in.</span>
                   </div>
                 )}
 
                 {selectedTab === 'rejected' && (
-                  <div className="pt-4 border-t border-gray-200">
-                    <p className="text-sm text-red-700">
-                      ❌ User signup has been rejected.
-                    </p>
+                  <div className="pt-4 border-t border-gray-200 flex items-center gap-2 text-sm text-red-700">
+                    <XCircle className="h-4 w-4 text-red-600 shrink-0" />
+                    <span>User signup has been rejected.</span>
                   </div>
                 )}
               </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { Clock, AlertCircle, CheckCircle, Check } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'checking';
@@ -31,7 +31,7 @@ export default function PendingPage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // ✅ FIX: User without session should see pending, not rejected
+      // FIX: User without session should see pending, not rejected
       if (!user) {
         setStatus('pending');
         setMessage('Your signup is pending admin review. Check back soon!');
@@ -89,7 +89,7 @@ export default function PendingPage() {
     }
   }
 
-  // ✅ FIX: Add proper manual check handler with loading state
+  // FIX: Add proper manual check handler with loading state
   async function handleCheckStatusNow() {
     setIsCheckingManually(true);
     await checkVerificationStatus();
@@ -184,10 +184,22 @@ export default function PendingPage() {
               <strong>What happens next?</strong>
             </p>
             <ul className="text-sm text-yellow-800 mt-2 space-y-2">
-              <li>✓ Our admin team will verify your campus email</li>
-              <li>✓ Your account will be assigned to your campus</li>
-              <li>✓ You'll receive a notification once approved</li>
-              <li>✓ Then you can sign in and start using CampusShare</li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-yellow-700 shrink-0" />
+                <span>Our admin team will verify your campus email</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-yellow-700 shrink-0" />
+                <span>Your account will be assigned to your campus</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-yellow-700 shrink-0" />
+                <span>You'll receive a notification once approved</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-yellow-700 shrink-0" />
+                <span>Then you can sign in and start using CampusShare</span>
+              </li>
             </ul>
           </div>
 

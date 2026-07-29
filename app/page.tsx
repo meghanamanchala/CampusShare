@@ -3,6 +3,7 @@ import { ListingCard, ListingFeedRow } from '@/components/listing-card';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { LISTING_SELECT_FIELDS, mapListingRow } from '@/lib/listings';
 import Link from "next/link";
+import { ShieldCheck, PlusCircle, Handshake, Zap, Layers, Camera } from 'lucide-react';
 
 const stats = [
   { value: '2,400+', label: 'Active students' },
@@ -279,8 +280,14 @@ export default async function HomePage() {
           {steps.map((step, index) => (
             <article key={step.title} className="rounded-[1.75rem] border border-stone-light bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-soft">
               <p className="font-bold text-5xl leading-none text-stone">0{index + 1}</p>
-              <div className="mt-5 flex h-11 w-11 items-center justify-center rounded-xl border border-stone-light bg-cream text-lg">
-                {index === 0 ? 'V' : index === 1 ? 'P' : 'C'}
+              <div className="mt-5 flex h-11 w-11 items-center justify-center rounded-xl border border-stone-light bg-cream text-ink">
+                {index === 0 ? (
+                  <ShieldCheck className="h-5 w-5 text-accent" />
+                ) : index === 1 ? (
+                  <PlusCircle className="h-5 w-5 text-accent" />
+                ) : (
+                  <Handshake className="h-5 w-5 text-accent" />
+                )}
               </div>
               <h3 className="mt-4 text-xl font-semibold text-ink">{step.title}</h3>
               <p className="mt-3 text-sm leading-7 text-ink-2">{step.description}</p>
@@ -346,8 +353,16 @@ export default async function HomePage() {
             <div className="mt-10 space-y-4">
               {features.map((feature, index) => (
                 <div key={feature.title} className="flex flex-col sm:flex-row gap-4 rounded-2xl border border-transparent p-5 transition hover:border-stone-light hover:bg-white hover:shadow-sm">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-stone-light bg-cream-dark font-semibold text-ink-2">
-                    {index === 0 ? 'S' : index === 1 ? 'R' : index === 2 ? 'D' : 'F'}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-stone-light bg-cream-dark text-ink-2">
+                    {index === 0 ? (
+                      <ShieldCheck className="h-5 w-5" />
+                    ) : index === 1 ? (
+                      <Zap className="h-5 w-5" />
+                    ) : index === 2 ? (
+                      <Layers className="h-5 w-5" />
+                    ) : (
+                      <Camera className="h-5 w-5" />
+                    )}
                   </div>
                   <div>
                     <h3 className="font-medium text-ink">{feature.title}</h3>
