@@ -11,9 +11,11 @@ type EditListingPageProps = {
 export default async function EditListingPage({ params }: EditListingPageProps) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
-  const { data: sessionData } = await supabase.auth.getSession();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!sessionData.session?.user) {
+  if (!user) {
     redirect(`/my-listings`);
   }
 
@@ -27,7 +29,7 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
     notFound();
   }
 
-  if (listing.user_id !== sessionData.session.user.id) {
+  if (listing.user_id !== user.id) {
     notFound();
   }
 

@@ -18,7 +18,9 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
   const itemType = itemTypeFromFilter(type);
 
   const supabase = await createSupabaseServerClient();
-  const { data: sessionData } = await supabase.auth.getSession();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   let query = supabase
     .from('listings')
@@ -32,7 +34,7 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
 
   const { data: listingsData, error: listingsError } = await query;
   const feedItems = listingsData?.map(mapListingRow) ?? [];
-  const isSignedIn = Boolean(sessionData.session?.user);
+  const isSignedIn = Boolean(user);
 
   return (
     <main className="min-h-screen bg-cream text-ink">
