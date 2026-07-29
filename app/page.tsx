@@ -69,7 +69,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export default async function HomePage() {
   const supabase = await createSupabaseServerClient();
-  const { data: sessionData } = await supabase.auth.getSession();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data: listingsData, error: listingsError } = await supabase
     .from('listings')
     .select(LISTING_SELECT_FIELDS)
@@ -77,7 +79,7 @@ export default async function HomePage() {
     .order('created_at', { ascending: false })
     .limit(6);
 
-  const isSignedIn = Boolean(sessionData.session?.user);
+  const isSignedIn = Boolean(user);
   const primaryCtaLabel = isSignedIn ? 'Post an item' : 'Join free';
   const primaryCtaHref = isSignedIn ? '/post' : '#cta';
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';

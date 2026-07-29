@@ -8,18 +8,20 @@ import { LISTING_SELECT_FIELDS, mapListingRow } from '@/lib/listings';
 
 export default async function MyListingsPage() {
   const supabase = await createSupabaseServerClient();
-  const { data: sessionData } = await supabase.auth.getSession();
-  const isSignedIn = Boolean(sessionData.session?.user);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isSignedIn = Boolean(user);
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
   let listings: ReturnType<typeof mapListingRow>[] = [];
 
-  if (isSignedIn && sessionData.session?.user) {
+  if (isSignedIn && user) {
     const { data } = await supabase
       .from('listings')
       .select(LISTING_SELECT_FIELDS)
-      .eq('user_id', sessionData.session.user.id)
+      .eq('user_id', user.id)
       .neq('status', 'removed')
       .order('created_at', { ascending: false });
 
