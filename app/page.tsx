@@ -91,11 +91,14 @@ export default async function HomePage() {
     <main className="relative overflow-hidden bg-cream text-ink">
       <div className="absolute right-[-8rem] top-[-8rem] h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(214,208,200,0.85)_0%,rgba(245,243,238,0)_70%)]" />
 
-      <header className="sticky top-0 z-50 border-b border-stone-light/80 bg-cream/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-stone-light/70 bg-cream/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <a href="#top" className="flex items-center gap-3 font-bold text-xl">
-            <span className="h-2 w-2 rounded-full bg-accent" />
-            CampusShare
+          <a href="#top" className="flex items-center gap-3 font-bold text-xl tracking-tight text-ink transition hover:opacity-90">
+            <span className="relative flex h-3 w-3 items-center justify-center">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
+            </span>
+            <span>Campus<span className="font-serif italic text-ink-3">Share</span></span>
           </a>
 
           {/* Mobile Menu Button */}
@@ -117,7 +120,7 @@ export default async function HomePage() {
               href="/feed"
               className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
             >
-              Browse
+              Browse Feed
             </a>
 
             <a
@@ -129,7 +132,7 @@ export default async function HomePage() {
 
             <a
               href={primaryCtaHref}
-              className="rounded-xl bg-ink px-5 py-2.5 text-sm font-medium text-cream"
+              className="ml-2 rounded-xl bg-ink px-5 py-2.5 text-sm font-medium text-cream shadow-sm transition hover:bg-ink-2"
             >
               {primaryCtaLabel}
             </a>
@@ -140,41 +143,46 @@ export default async function HomePage() {
       <section id="top" className="relative mx-auto max-w-6xl px-4 sm:px-6 pb-16 pt-16 md:pb-24 md:pt-28">
         <div className="grid items-center gap-16 lg:grid-cols-2">
           <div>
-            <div className="mb-6 flex items-center gap-3">
-              <span className="rounded-full bg-green-light px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-green">
-                Campus-only
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-green-light px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-green-700 border border-green/20">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Verified Campus Network
               </span>
-              <span className="h-px w-8 bg-stone" />
-              <span className="text-sm text-ink-3">Verified students only</span>
+              <span className="h-px w-6 bg-stone" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-ink-3">Zero Noise • 100% Peer Trust</span>
             </div>
-            <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-7xl">
+
+            <h1 className="max-w-xl font-serif text-4xl leading-tight tracking-tight sm:text-5xl md:text-6xl text-ink">
               Your campus, <span className="italic text-ink-3">less stuff</span> going to waste.
             </h1>
+
             <p className="mt-6 max-w-xl text-lg font-light leading-8 text-ink-2">
-              Give, borrow, buy, or claim items with verified students nearby. A simple way to share useful things within your campus community.            </p>
+              Give away, borrow, buy, or claim books, furniture, chargers, and lab gear with verified students nearby. Fast pickup, zero shipping fees.
+            </p>
 
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <a href={primaryCtaHref} className="rounded-xl bg-ink px-7 py-3.5 text-sm font-medium text-cream shadow-soft transition hover:-translate-y-0.5 hover:bg-ink-2">
+              <a href={primaryCtaHref} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-ink px-7 py-3.5 text-sm font-medium text-cream shadow-soft transition hover:-translate-y-0.5 hover:bg-ink-2">
+                <Zap className="h-4 w-4 fill-cream" />
                 {primaryCtaLabel}
               </a>
-              <a href="#how-it-works" className="rounded-xl border border-stone px-6 py-3 text-sm text-ink-2 transition hover:bg-stone-light">
-                See how it works
+              <a href="/feed" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-stone bg-white px-6 py-3.5 text-sm text-ink transition hover:bg-stone-light">
+                Browse Live Feed
               </a>
             </div>
 
-            <div className="mt-8 hidden md:flex items-center gap-3 text-sm text-ink-3">
+            <div className="mt-8 flex items-center gap-3 text-sm text-ink-3">
               <div className="flex -space-x-2">
-                {['AK', 'SM', 'PR', 'JL'].map((label) => (
-                  <span key={label} className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-cream bg-stone text-[11px] font-semibold text-ink-2">
+                {['AK', 'RM', 'PS', 'DT'].map((label) => (
+                  <span key={label} className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-cream bg-stone text-[11px] font-semibold text-ink-2 shadow-xs">
                     {label}
                   </span>
                 ))}
-                <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-cream bg-green-light text-[11px] font-semibold text-green">
-                  +
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-cream bg-green-light text-[11px] font-semibold text-green shadow-xs">
+                  ✓
                 </span>
               </div>
-              <p>
-                <span className="font-medium text-ink-2">2,400+ students</span> across 12 campuses are already sharing
+              <p className="text-xs sm:text-sm">
+                <span className="font-semibold text-ink">2,400+ students</span> across 12 campuses are sharing today
               </p>
             </div>
           </div>
