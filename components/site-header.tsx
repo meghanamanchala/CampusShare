@@ -40,12 +40,20 @@ export function SiteHeader({
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-3">
           {showMyListings && (
-            <a
-              href="/my-listings"
-              className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
-            >
-              My Listings
-            </a>
+            <>
+              <a
+                href="/profile"
+                className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
+              >
+                Profile
+              </a>
+              <a
+                href="/my-listings"
+                className="rounded-xl px-4 py-2 text-sm text-ink-2 transition hover:bg-stone-light"
+              >
+                My Listings
+              </a>
+            </>
           )}
 
           <a
