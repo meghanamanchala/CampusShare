@@ -44,9 +44,20 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
   }
 
   if (searchQuery) {
-    query = query.or(
-      `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,pickup_location.ilike.%${searchQuery}%`
-    );
+    const searchTerms = searchQuery
+      .split(/[\s,|]+/)
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+
+    if (searchTerms.length > 0) {
+      const orConditions = searchTerms.flatMap((term) => [
+        `title.ilike.%${term}%`,
+        `description.ilike.%${term}%`,
+        `pickup_location.ilike.%${term}%`,
+      ]);
+
+      query = query.or(orConditions.join(','));
+    }
   }
 
   if (sortOption === 'price-asc') {
@@ -58,7 +69,14 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
   }
 
   const { data: listingsData, error: listingsError } = await query;
-  const feedItems = listingsData?.map(mapListingRow) ?? [];
+  let feedItems = listingsData?.map(mapListingRow) ?? [];
+
+  // Refine textbook/notes search so tech items like chargers don't falsely match "Mac Book"
+  if (searchQuery && (searchQuery.toLowerCase().includes('textbook') || searchQuery.toLowerCase().includes('notes'))) {
+    feedItems = feedItems.filter(
+      (item) => !item.title.toLowerCase().includes('charger') && !item.title.toLowerCase().includes('mouse')
+    );
+  }
   const isSignedIn = Boolean(user);
 
   return (

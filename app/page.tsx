@@ -23,12 +23,12 @@ import {
 } from 'lucide-react';
 
 const categories = [
-  { name: 'Textbooks & Notes', count: 'Explore items', icon: BookOpen, href: '/feed?type=all' },
-  { name: 'Tech & Electronics', count: 'Explore items', icon: Laptop, href: '/feed?type=all' },
-  { name: 'Dorm & Furniture', count: 'Explore items', icon: Armchair, href: '/feed?type=all' },
-  { name: 'Bikes & Transit', count: 'Explore items', icon: Bike, href: '/feed?type=all' },
+  { name: 'Textbooks & Notes', count: 'Explore items', icon: BookOpen, href: '/feed?q=textbook,notes' },
+  { name: 'Tech & Electronics', count: 'Explore items', icon: Laptop, href: '/feed?q=charger,mouse,calculator,laptop,phone' },
+  { name: 'Dorm & Furniture', count: 'Explore items', icon: Armchair, href: '/feed?q=chair,table,dorm,desk' },
+  { name: 'Bikes & Transit', count: 'Explore items', icon: Bike, href: '/feed?q=bike,cycle,scooter' },
   { name: 'Free & Giveaways', count: 'Explore items', icon: Gift, href: '/feed?type=free' },
-  { name: 'Sports & Fitness', count: 'Explore items', icon: Dumbbell, href: '/feed?type=all' },
+  { name: 'Sports & Fitness', count: 'Explore items', icon: Dumbbell, href: '/feed?q=sports,fitness,gym' },
 ];
 
 const steps = [
