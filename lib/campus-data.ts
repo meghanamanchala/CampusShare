@@ -72,42 +72,4 @@ export function getListingDisplayPrice(
       return 'Free';
   }
 }
-
-export const demoListings: CampusListing[] = [
-  {
-    id: 'demo-1',
-    icon: 'BK',
-    imageUrl: null,
-    title: 'GATE ECE study notes, set of 8',
-    owner: 'Ananya K.',
-    time: '10 mins ago',
-    tag: 'Free',
-    price: 'Free',
-    tagClassName: 'bg-[#eaf3de] text-[#2a5c3f]',
-    status: 'available',
-  },
-  {
-    id: 'demo-2',
-    icon: 'CH',
-    imageUrl: null,
-    title: 'Study chair, good condition',
-    owner: 'Rahul M.',
-    time: '35 mins ago',
-    tag: 'For sale',
-    price: '₹600',
-    tagClassName: 'bg-[#f5f0e8] text-[#6b6859]',
-    status: 'available',
-  },
-  {
-    id: 'demo-3',
-    icon: 'CL',
-    imageUrl: null,
-    title: 'Lab coat, size M, borrowed for a week',
-    owner: 'Dev T.',
-    time: '2 hrs ago',
-    tag: 'Borrow',
-    price: 'Borrow',
-    tagClassName: 'bg-[#eef2f7] text-[#3d6080]',
-    status: 'claimed',
-  },
-];
+

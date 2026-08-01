@@ -32,11 +32,11 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
 
   let query = supabase
     .from('listings')
-    .select(LISTING_SELECT_FIELDS)
-    .neq('status', 'removed');
+    .select('*')
+    .or('status.neq.removed,status.is.null');
 
   if (statusFilter === 'available') {
-    query = query.eq('status', 'available');
+    query = query.or('status.eq.available,status.is.null');
   }
 
   if (itemType) {

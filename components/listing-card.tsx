@@ -105,7 +105,7 @@ export function ListingFeedRow({
       href={`/listings/${item.id}`}
       className={cn(
         'group flex gap-3 rounded-xl p-3 transition hover:bg-cream',
-        (faded || isClaimed) && 'opacity-70'
+        faded && 'opacity-80'
       )}
     >
       <div className="relative shrink-0">
