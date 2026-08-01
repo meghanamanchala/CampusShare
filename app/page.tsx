@@ -1,9 +1,8 @@
-import MobileMenu from '@/components/mobile-menu';
 import { ListingCard, ListingFeedRow } from '@/components/listing-card';
+import { SiteHeader } from '@/components/site-header';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { mapListingRow } from '@/lib/listings';
 import Link from 'next/link';
-import { SiteLogo } from '@/components/site-logo';
 import {
   ShieldCheck,
   PlusCircle,
@@ -132,39 +131,7 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-cream text-ink">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-stone-light/60 bg-cream/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <a href="#top" className="transition hover:opacity-80">
-            <SiteLogo />
-          </a>
-
-          <MobileMenu
-            primaryCtaHref={primaryCtaHref}
-            primaryCtaLabel={primaryCtaLabel}
-          />
-
-          <nav className="hidden items-center gap-6 md:flex">
-            <a href="#how-it-works" className="text-sm text-ink-2 hover:text-ink transition">
-              How it works
-            </a>
-            <a href="#categories" className="text-sm text-ink-2 hover:text-ink transition">
-              Categories
-            </a>
-            <a href="/feed" className="text-sm text-ink-2 hover:text-ink transition">
-              Browse Feed
-            </a>
-            <a href="#features" className="text-sm text-ink-2 hover:text-ink transition">
-              Features
-            </a>
-            <a
-              href={primaryCtaHref}
-              className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-cream shadow-2xs hover:bg-ink-2 transition"
-            >
-              {primaryCtaLabel}
-            </a>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader showMyListings={isSignedIn} />
 
       {/* Hero Section */}
       <section id="top" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
