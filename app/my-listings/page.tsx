@@ -22,7 +22,7 @@ export default async function MyListingsPage() {
       .from('listings')
       .select(LISTING_SELECT_FIELDS)
       .eq('user_id', user.id)
-      .neq('status', 'removed')
+      .or('status.neq.removed,status.is.null')
       .order('created_at', { ascending: false });
 
     listings = data?.map(mapListingRow) ?? [];
