@@ -92,7 +92,7 @@ export default async function MessagesInboxPage() {
             Messages & Pickups
           </p>
           <h1 className="mt-2 font-bold text-3xl sm:text-4xl md:text-5xl tracking-[-0.03em]">
-            Your <span className="italic text-ink-3">conversations</span>
+            Your <span className="text-ink-3">conversations</span>
           </h1>
           <p className="mt-3 text-base text-ink-2">
             Coordinate pickups, ask questions, and arrange trades safely with campus peers.
