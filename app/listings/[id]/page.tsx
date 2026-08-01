@@ -90,11 +90,11 @@ export default async function ListingDetailPage({
               <ListingStatusBadge status={status} />
             </div>
 
-            <h1 className="mt-5 font-serif text-3xl leading-tight tracking-[-0.03em] text-ink sm:text-4xl md:text-5xl">
+            <h1 className="mt-5 font-bold text-3xl leading-tight tracking-[-0.03em] text-ink sm:text-4xl md:text-5xl">
               {listing.title}
             </h1>
 
-            <p className="mt-4 font-serif text-3xl text-ink">{price}</p>
+            <p className="mt-4 font-bold text-3xl text-ink">{price}</p>
 
             {status === 'claimed' ? (
               <p className="mt-4 rounded-2xl bg-stone-light px-4 py-3 text-sm text-ink-2">

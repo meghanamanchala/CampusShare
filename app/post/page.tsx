@@ -32,34 +32,25 @@ export default async function PostPage() {
         showMyListings={isSignedIn}
       />
 
-      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-16 md:py-20">
-        <div className="mb-8 max-w-3xl sm:mb-12">
-          <span className="inline-flex items-center rounded-full bg-green-light px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-green">
-            Campus Marketplace
-          </span>
-
-          <h1 className="mt-5 font-serif text-4xl tracking-[-0.03em] sm:text-5xl md:text-7xl">
-            Post an <span className="italic text-ink-3">Item</span>
+      <section className="mx-auto max-w-xl px-4 py-8 sm:py-12">
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
+            Post an Item
           </h1>
-
-          <p className="mt-4 max-w-2xl text-base leading-7 text-ink-2 sm:text-lg sm:leading-8">
-            Share, sell, lend, or give away useful items to students in your
-            campus community.
+          <p className="mt-1 text-xs sm:text-sm text-ink-2 font-light">
+            Share, sell, or lend useful items to students on your campus.
           </p>
         </div>
 
         {isSignedIn ? (
-          <div className="max-w-3xl">
-            <ListingForm defaultOwnerName={defaultOwnerName} />
-          </div>
+          <ListingForm defaultOwnerName={defaultOwnerName} />
         ) : (
-          <div className="max-w-2xl rounded-[1.5rem] sm:rounded-[2rem] border border-stone-light bg-white p-5 sm:p-8 shadow-soft">
-            <h2 className="font-serif text-2xl sm:text-3xl text-ink">
-              Sign in to continue
+          <div className="rounded-2xl border border-stone-light/80 bg-white p-6 shadow-2xs">
+            <h2 className="text-xl font-bold text-ink">
+              Sign in to post
             </h2>
-
-            <p className="mt-3 text-sm sm:text-base text-ink-3">
-              Use your campus email to create and manage listings.
+            <p className="mt-1 text-xs text-ink-3">
+              Use your campus email to create listings.
             </p>
 
             <div className="mt-6">

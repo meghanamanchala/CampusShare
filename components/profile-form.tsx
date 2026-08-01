@@ -87,7 +87,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-serif text-2xl sm:text-3xl text-ink font-bold tracking-tight">
+              <h2 className="text-2xl sm:text-3xl text-ink font-bold tracking-tight">
                 {fullName || 'CampusShare User'}
               </h2>
               {profile.is_admin && (
@@ -118,7 +118,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       {/* Profile Edit Card Form */}
       <Card className="overflow-hidden">
         <CardHeader className="border-b border-stone-light/80 bg-cream/40 px-4 py-5 sm:px-6 sm:py-6">
-          <CardTitle className="font-serif text-xl sm:text-2xl text-ink">
+          <CardTitle className="text-xl sm:text-2xl text-ink">
             Profile Settings
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm text-ink-3">

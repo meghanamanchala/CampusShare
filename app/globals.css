@@ -3,6 +3,8 @@
 @tailwind utilities;
 
 :root {
+  --base-font-size: 16px;
+
   --cream: #fafafa;
   --cream-dark: #f4f4f5;
 
@@ -20,18 +22,18 @@
 }
 
 html {
+  font-size: var(--base-font-size);
   scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-
   background: var(--cream);
   color: var(--ink);
-
-  font-family: var(--font-sans), system-ui, sans-serif;
-
+  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

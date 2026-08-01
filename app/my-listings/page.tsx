@@ -41,8 +41,8 @@ export default async function MyListingsPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-ink-3">
             Your listings
           </p>
-          <h1 className="mt-4 font-serif text-4xl tracking-[-0.03em] sm:text-5xl md:text-6xl">
-            Manage <span className="italic text-ink-3">your posts</span>
+          <h1 className="mt-4 font-bold text-4xl tracking-[-0.03em] sm:text-5xl md:text-6xl">
+            Manage <span className="text-ink-3">your posts</span>
           </h1>
           <p className="mt-4 text-lg leading-8 text-ink-2">
             Edit details, mark items as claimed, or remove listings from the
@@ -126,7 +126,7 @@ export default async function MyListingsPage() {
           </div>
         ) : (
           <div className="mt-10 max-w-2xl rounded-[2rem] border border-stone-light bg-white p-8 shadow-soft">
-            <h2 className="font-serif text-3xl text-ink">Sign in to continue</h2>
+            <h2 className="font-bold text-3xl text-ink">Sign in to continue</h2>
             <p className="mt-3 text-ink-3">
               Use your campus email to view and manage your listings.
             </p>

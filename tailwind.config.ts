@@ -27,7 +27,7 @@ const config: Config = {
       },
 
       fontFamily: {
-        sans: ['var(--font-sans)'],
+        sans: ['var(--font-sans)', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
       },
 
       boxShadow: {

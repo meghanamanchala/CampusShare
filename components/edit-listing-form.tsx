@@ -124,7 +124,7 @@ export function EditListingForm({ listing }: EditListingFormProps) {
   return (
     <Card className="overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-stone-light bg-white shadow-soft">
       <CardHeader className="border-b border-stone-light/80 bg-cream/40 px-4 py-5 sm:px-6 sm:py-6">
-        <CardTitle className="font-serif text-3xl sm:text-4xl text-ink">
+        <CardTitle className="font-bold text-3xl sm:text-4xl text-ink">
           Edit Listing
         </CardTitle>
         <CardDescription className="text-ink-3">

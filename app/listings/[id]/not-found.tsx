@@ -9,7 +9,7 @@ export default function ListingNotFound() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-3">
           Not found
         </p>
-        <h1 className="mt-4 font-serif text-3xl sm:text-4xl tracking-[-0.03em] text-ink">
+        <h1 className="mt-4 font-bold text-3xl sm:text-4xl tracking-[-0.03em] text-ink">
           This listing is no longer available
         </h1>
         <p className="mt-4 text-base leading-8 text-ink-2">
