@@ -5,14 +5,6 @@ import { useRouter } from 'next/navigation';
 import { ImagePlus, X } from 'lucide-react';
 import { createListingAction, type ListingActionState } from '@/app/actions';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -60,7 +52,7 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
     if (files.length === 0) return;
 
     if (selectedFiles.length + files.length > 5) {
-      setImageError('You can upload a maximum of 5 images per listing.');
+      setImageError('Maximum 5 images per listing.');
       return;
     }
 
@@ -106,56 +98,93 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
   }
 
   return (
-    <Card className="overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-stone-light bg-white shadow-soft">
-      <CardHeader className="border-b border-stone-light/80 bg-cream/40 px-4 py-5 sm:px-6 sm:py-6">
-        <div className="inline-flex w-fit items-center rounded-full bg-green-light px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-green">
-          Campus Listing
+    <div className="rounded-2xl border border-stone-light/80 bg-white p-5 sm:p-6 shadow-2xs">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Listing Type Toggle Pill Bar */}
+        <div>
+          <Label className="text-xs font-semibold uppercase tracking-wider text-ink-3">Listing Type</Label>
+          <input type="hidden" name="itemType" value={listingType} />
+          <div className="mt-2 grid grid-cols-3 gap-1.5 rounded-xl border border-stone-light/80 bg-cream p-1 text-xs font-medium">
+            {['Free', 'For sale', 'Borrow'].map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setListingType(type)}
+                className={`rounded-lg py-2 transition ${
+                  listingType === type
+                    ? 'bg-ink font-semibold text-cream shadow-2xs'
+                    : 'text-ink-2 hover:bg-stone-light/50'
+                }`}
+              >
+                {type === 'For sale' ? 'For Sale' : type}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <CardTitle className="mt-4 font-bold text-2xl sm:text-3xl md:text-4xl text-ink">
-          Post an Item
-        </CardTitle>
+        {/* Item Title */}
+        <div className="space-y-1.5">
+          <Label htmlFor="title" className="text-xs font-semibold text-ink">Item Title *</Label>
+          <Input
+            id="title"
+            name="title"
+            placeholder="e.g. MacBook Charger, Graphing Calculator, Study Lamp"
+            required
+            className="h-10 text-sm border-stone-light/80 focus:border-ink rounded-xl"
+          />
+        </div>
 
-        <CardDescription className="max-w-xl text-sm sm:text-base leading-6 sm:leading-7 text-ink-3">
-          Add a photo and short description so students can find your item quickly.
-        </CardDescription>
-      </CardHeader>
-
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-6 px-4 py-5 sm:px-6 sm:py-8">
-          <div className="space-y-2">
-            <Label htmlFor="title">Item Title</Label>
+        {/* Price if For sale */}
+        {listingType === 'For sale' && (
+          <div className="space-y-1.5 animate-in fade-in duration-200">
+            <Label htmlFor="price" className="text-xs font-semibold text-ink">Price (₹) *</Label>
             <Input
-              id="title"
-              name="title"
-              placeholder="MacBook charger, study chair, calculator..."
+              id="price"
+              name="price"
+              placeholder="e.g. 600"
               required
-              className="h-12"
+              className="h-10 text-sm border-stone-light/80 focus:border-ink rounded-xl"
+            />
+          </div>
+        )}
+
+        {/* Description */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="description" className="text-xs font-semibold text-ink">Description</Label>
+            <span className="text-[10px] text-ink-3">
+              {description.length}/{MAX_DESCRIPTION_LENGTH}
+            </span>
+          </div>
+          <Textarea
+            id="description"
+            name="description"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            maxLength={MAX_DESCRIPTION_LENGTH}
+            placeholder="Item condition, notes, or details..."
+            className="min-h-[80px] text-sm border-stone-light/80 focus:border-ink rounded-xl"
+          />
+        </div>
+
+        {/* Pickup Location & Condition Grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="pickupLocation" className="text-xs font-semibold text-ink">Pickup Spot</Label>
+            <Input
+              id="pickupLocation"
+              name="pickupLocation"
+              placeholder="e.g. Library / Hostel 4"
+              className="h-10 text-sm border-stone-light/80 focus:border-ink rounded-xl"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              name="description"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              maxLength={MAX_DESCRIPTION_LENGTH}
-              placeholder="Condition, pickup spot, borrow duration, or anything helpful for the next student..."
-            />
-            <p className="text-xs text-ink-3">
-              Optional. {description.length}/{MAX_DESCRIPTION_LENGTH} characters
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="condition">Condition</Label>
-
+          <div className="space-y-1.5">
+            <Label htmlFor="condition" className="text-xs font-semibold text-ink">Condition</Label>
             <select
               id="condition"
               name="condition"
-              className="h-12 w-full rounded-xl border border-stone-light px-4"
+              className="h-10 w-full rounded-xl border border-stone-light/80 bg-white px-3 text-sm text-ink outline-none focus:border-ink"
             >
               <option value="">Select condition</option>
               <option value="New">New</option>
@@ -164,263 +193,105 @@ export function ListingForm({ defaultOwnerName }: ListingFormProps) {
               <option value="Fair">Fair</option>
             </select>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="pickupLocation">
-              Pickup Location
-            </Label>
+        {/* Owner Name */}
+        <div className="space-y-1.5">
+          <Label htmlFor="ownerName" className="text-xs font-semibold text-ink">Your Name *</Label>
+          <Input
+            id="ownerName"
+            name="ownerName"
+            defaultValue={defaultOwnerName}
+            required
+            className="h-10 text-sm border-stone-light/80 focus:border-ink rounded-xl"
+          />
+        </div>
 
-            <Input
-              id="pickupLocation"
-              name="pickupLocation"
-              placeholder="Library Entrance"
-            />
-          </div>
+        {/* Upload Photos */}
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-ink">Item Photos ({selectedFiles.length}/5)</Label>
+          <input
+            ref={fileInputRef}
+            id="image"
+            name="images"
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="sr-only"
+            onChange={handleImageChange}
+          />
 
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="itemType">Listing Type</Label>
-              <select
-                id="itemType"
-                name="itemType"
-                value={listingType}
-                onChange={(event) => setListingType(event.target.value)}
-                className="h-12 w-full rounded-xl border border-stone-light bg-white px-4 text-sm text-ink outline-none transition focus:border-ink"
-              >
-                <option value="Free">Free</option>
-                <option value="For sale">For Sale</option>
-                <option value="Borrow">Borrow</option>
-              </select>
-            </div>
-
-            {listingType === 'For sale' && (
-              <div className="space-y-3">
-                <Label htmlFor="price">Price</Label>
-
-                <Input
-                  id="price"
-                  name="price"
-                  placeholder="₹600"
-                  required
-                />
-
-                <label className="flex items-center gap-2 text-sm text-ink-2">
-                  <input
-                    type="checkbox"
-                    name="negotiable"
+          {selectedFiles.length > 0 ? (
+            <div className="grid grid-cols-4 gap-2 pt-1">
+              {selectedFiles.map((item, index) => (
+                <div
+                  key={`${item.url}-${index}`}
+                  className="group relative h-20 w-full overflow-hidden rounded-xl border border-stone-light/80 bg-cream"
+                >
+                  <img
+                    src={item.url}
+                    alt={`Photo ${index + 1}`}
+                    className="h-full w-full object-cover"
                   />
-                  Negotiable
-                </label>
-              </div>
-            )}
-          </div>
-
-          {listingType === 'Borrow' && (
-            <div className="space-y-4 rounded-xl border border-stone-light p-4">
-              <h3 className="font-medium text-ink">
-                Borrow Details
-              </h3>
-
-              <div className="space-y-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="borrowType"
-                    value="request"
-                  />
-                  I need to borrow this
-                </label>
-
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="borrowType"
-                    value="offer"
-                    defaultChecked
-                  />
-                  I am lending this out
-                </label>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="borrowDuration">
-                  Maximum Duration
-                </Label>
-
-                <Input
-                  id="borrowDuration"
-                  name="borrowDuration"
-                  placeholder="7 days"
-                />
-              </div>
-            </div>
-          )}
-
-
-          <div className="space-y-3">
-            <Label htmlFor="contactMethod">
-              Contact Method
-            </Label>
-
-            <select
-              id="contactMethod"
-              name="contactMethod"
-              className="h-12 w-full rounded-xl border border-stone-light px-4"
-            >
-              <option value="email">
-                Share Institutional Email
-              </option>
-
-              <option value="phone">
-                WhatsApp / Phone
-              </option>
-
-              <option value="chat">
-                In-App Chat
-              </option>
-            </select>
-          </div>
-
-
-
-
-          <div className="space-y-2">
-            <Label htmlFor="ownerName">Your Name</Label>
-            <Input
-              id="ownerName"
-              name="ownerName"
-              defaultValue={defaultOwnerName}
-              required
-              className="h-12"
-            />
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="image">Item Photos ({selectedFiles.length}/5)</Label>
-              <span className="text-xs text-ink-3">Upload up to 5 photos</span>
-            </div>
-
-            <input
-              ref={fileInputRef}
-              id="image"
-              name="images"
-              type="file"
-              multiple
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              className="sr-only"
-              onChange={handleImageChange}
-            />
-
-            {selectedFiles.length > 0 ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {selectedFiles.map((item, index) => (
-                    <div
-                      key={`${item.url}-${index}`}
-                      className="group relative h-32 w-full overflow-hidden rounded-2xl border border-stone-light bg-cream-dark shadow-sm"
-                    >
-                      <img
-                        src={item.url}
-                        alt={`Photo ${index + 1}`}
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute right-2 top-2 rounded-full bg-ink/80 p-1.5 text-cream transition hover:bg-red-600"
-                        aria-label={`Remove photo ${index + 1}`}
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                      <span className="absolute bottom-1.5 left-2 rounded-md bg-ink/70 px-1.5 py-0.5 text-[10px] font-semibold text-cream">
-                        {index === 0 ? 'Primary' : `#${index + 1}`}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {selectedFiles.length < 5 && (
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-stone bg-cream/40 py-3 text-xs font-semibold text-ink transition hover:bg-cream"
+                    onClick={() => removeImage(index)}
+                    className="absolute right-1 top-1 rounded-full bg-ink/80 p-1 text-white hover:bg-red-600 transition"
                   >
-                    <ImagePlus className="h-4 w-4" />
-                    Add More Photos ({5 - selectedFiles.length} remaining)
+                    <X className="h-3 w-3" />
                   </button>
-                )}
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center rounded-[1.25rem] border border-dashed border-stone bg-cream/60 px-4 py-8 sm:px-6 sm:py-10 text-center transition hover:border-ink hover:bg-cream"
-              >
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm">
-                  <ImagePlus className="h-5 w-5 text-ink-2" />
-                </span>
-                <span className="mt-4 text-sm font-medium text-ink">
-                  Upload Item Photos (Up to 5)
-                </span>
-                <span className="mt-1 text-xs text-ink-3">
-                  JPEG, PNG, WebP, or GIF up to 5 MB each
-                </span>
-              </button>
-            )}
+                </div>
+              ))}
+              {selectedFiles.length < 5 && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex h-20 w-full items-center justify-center rounded-xl border border-dashed border-stone bg-cream/40 hover:bg-cream transition"
+                >
+                  <ImagePlus className="h-4 w-4 text-ink-3" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-stone-light/80 bg-cream/30 py-3 text-xs text-ink-2 hover:border-stone hover:bg-cream/60 transition"
+            >
+              <ImagePlus className="h-4 w-4 text-ink-3" />
+              Upload Photos (Optional, up to 5)
+            </button>
+          )}
 
-            {imageError ? (
-              <p className="text-sm text-red-600">{imageError}</p>
-            ) : null}
-          </div>
+          {imageError ? (
+            <p className="text-xs text-red-600">{imageError}</p>
+          ) : null}
+        </div>
 
-
-
-          <div className="rounded-xl sm:rounded-2xl border border-stone-light bg-cream-dark p-4">
-            <h3 className="font-medium text-ink">Tips for faster responses</h3>
-            <ul className="mt-3 space-y-2 text-sm text-ink-3">
-              <li>Add a clear photo in good lighting</li>
-              <li>Mention condition and pickup location in the description</li>
-              <li>Use a specific title students can search for</li>
-            </ul>
-          </div>
-
+        {/* Status Message */}
+        {state.status !== 'idle' && (
           <div
-            className={`rounded-xl sm:rounded-2xl border px-4 py-3 text-sm ${state.status === 'error'
-              ? 'border-red-200 bg-red-50 text-red-700'
-              : state.status === 'success'
-                ? 'border-green-200 bg-green-50 text-green-700'
-                : 'border-neutral-200 bg-neutral-50 text-neutral-600'
-              }`}
+            className={`rounded-xl border px-3 py-2 text-xs font-medium ${
+              state.status === 'error'
+                ? 'border-red-200 bg-red-50 text-red-700'
+                : 'border-green-200 bg-green-50 text-green-700'
+            }`}
           >
             {state.message}
           </div>
-        </CardContent>
+        )}
 
-        <CardFooter
-          className="
-  sticky
-  bottom-0
-  z-20
-  bg-white
-  border-t
-  border-stone-light
-  px-4
-  py-4
-  shadow-[0_-4px_12px_rgba(0,0,0,0.05)]
-"
-        >
-
+        {/* Action Button */}
+        <div className="pt-2">
           <Button
             type="submit"
             disabled={pending || Boolean(imageError)}
-            className="h-11 sm:h-12 w-full rounded-xl bg-ink text-cream hover:bg-ink-2"
+            className="h-11 w-full rounded-xl bg-ink font-medium text-cream hover:bg-ink-2 shadow-2xs transition"
           >
-            {pending ? 'Posting...' : 'Post Listing'}
+            {pending ? 'Publishing...' : 'Publish Listing'}
           </Button>
-        </CardFooter>
+        </div>
       </form>
-    </Card>
+    </div>
   );
 }
