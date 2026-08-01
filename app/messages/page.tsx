@@ -91,7 +91,7 @@ export default async function MessagesInboxPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-ink-3">
             Messages & Pickups
           </p>
-          <h1 className="mt-2 font-serif text-3xl sm:text-4xl md:text-5xl tracking-[-0.03em]">
+          <h1 className="mt-2 font-bold text-3xl sm:text-4xl md:text-5xl tracking-[-0.03em]">
             Your <span className="italic text-ink-3">conversations</span>
           </h1>
           <p className="mt-3 text-base text-ink-2">
@@ -130,7 +130,7 @@ export default async function MessagesInboxPage() {
                         )}
                       </div>
 
-                      <h2 className="font-serif text-lg text-ink group-hover:text-ink-2 transition">
+                      <h2 className="font-semibold text-lg text-ink group-hover:text-ink-2 transition">
                         {conv.listingTitle}
                       </h2>
 
@@ -158,7 +158,7 @@ export default async function MessagesInboxPage() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cream-dark">
                 <MessageSquare className="h-6 w-6 text-ink-3" />
               </div>
-              <h2 className="mt-4 font-serif text-xl text-ink">No messages yet</h2>
+              <h2 className="mt-4 font-bold text-xl text-ink">No messages yet</h2>
               <p className="mt-2 text-sm text-ink-3 max-w-sm mx-auto">
                 Message a seller on any listing or post an item to start receiving messages from buyers.
               </p>

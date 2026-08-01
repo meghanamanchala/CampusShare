@@ -74,7 +74,7 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-ink-3">
             Campus Feed
           </p>
-          <h1 className="mt-4 font-serif text-3xl sm:text-4xl md:text-6xl tracking-[-0.03em]">
+          <h1 className="mt-4 font-bold text-3xl sm:text-4xl md:text-6xl tracking-[-0.03em]">
             Browse <span className="italic text-ink-3">live listings</span>
           </h1>
           <p className="mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-ink-2">

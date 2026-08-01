@@ -24,7 +24,7 @@ export default async function ProfilePage() {
       <main className="min-h-screen bg-cream text-ink">
         <SiteHeader showMyListings={true} />
         <div className="mx-auto max-w-xl px-4 py-16 text-center">
-          <h1 className="font-serif text-2xl font-bold">Profile not found</h1>
+          <h1 className="text-2xl font-bold">Profile not found</h1>
           <p className="mt-2 text-sm text-ink-3">We couldn't retrieve your profile data. Please try signing in again.</p>
         </div>
       </main>

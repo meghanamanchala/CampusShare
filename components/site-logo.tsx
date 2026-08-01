@@ -19,7 +19,7 @@ export function SiteLogo({ className = '' }: { className?: string }) {
       </div>
 
       <span className="font-bold text-lg sm:text-[1.3rem] tracking-tight text-ink">
-        Campus<span className="font-serif italic text-ink-3">Share</span>
+        Campus<span className="font-medium text-ink-3">Share</span>
       </span>
     </div>
   );

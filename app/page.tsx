@@ -244,7 +244,7 @@ export default async function HomePage() {
               <span className="text-ink-2 font-normal">Over 8,100+ items exchanged</span>
             </div>
 
-            <h1 className="font-serif text-4xl leading-[1.15] tracking-tight sm:text-5xl md:text-6xl text-ink">
+            <h1 className="font-bold text-4xl leading-[1.15] tracking-tight sm:text-5xl md:text-6xl text-ink">
               Your campus, <span className="italic text-ink-3 underline decoration-amber-300 decoration-wavy underline-offset-8">less stuff</span> going to waste.
             </h1>
 

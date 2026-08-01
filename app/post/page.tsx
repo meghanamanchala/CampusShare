@@ -38,7 +38,7 @@ export default async function PostPage() {
             Campus Marketplace
           </span>
 
-          <h1 className="mt-5 font-serif text-4xl tracking-[-0.03em] sm:text-5xl md:text-7xl">
+          <h1 className="mt-5 font-bold text-4xl tracking-[-0.03em] sm:text-5xl md:text-7xl">
             Post an <span className="italic text-ink-3">Item</span>
           </h1>
 
@@ -54,7 +54,7 @@ export default async function PostPage() {
           </div>
         ) : (
           <div className="max-w-2xl rounded-[1.5rem] sm:rounded-[2rem] border border-stone-light bg-white p-5 sm:p-8 shadow-soft">
-            <h2 className="font-serif text-2xl sm:text-3xl text-ink">
+            <h2 className="font-bold text-2xl sm:text-3xl text-ink">
               Sign in to continue
             </h2>
 
