@@ -1,8 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { Shield } from 'lucide-react';
 import { SiteLogo } from '@/components/site-logo';
 import SiteMobileMenu from '@/components/site-mobile-menu';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
 type SiteHeaderProps = {
@@ -19,6 +22,33 @@ export function SiteHeader({
   showMyListings = false,
 }: SiteHeaderProps) {
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    async function checkAdmin() {
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', user.id)
+            .maybeSingle();
+
+          if (profile?.is_admin) {
+            setIsAdmin(true);
+          }
+        }
+      } catch {
+        setIsAdmin(false);
+      }
+    }
+    checkAdmin();
+  }, []);
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -71,6 +101,19 @@ export function SiteHeader({
                 Profile
               </a>
             </>
+          )}
+
+          {isAdmin && (
+            <a
+              href="/admin/dashboard"
+              className={cn(
+                navLinkClass('/admin'),
+                'inline-flex items-center gap-1.5 text-accent font-semibold'
+              )}
+            >
+              <Shield className="h-4 w-4" />
+              Admin Dashboard
+            </a>
           )}
 
           <a
