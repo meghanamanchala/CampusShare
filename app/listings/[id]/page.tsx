@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar, Tag, User, Clock, Info, MapPin, MessageSquare, Coins } from 'lucide-react';
-import { ClaimListingButton } from '@/components/claim-listing-button';
+import { ClaimRequestModal } from '@/components/claim-request-modal';
+import { OwnerClaimRequests } from '@/components/owner-claim-requests';
 import { MessageButton } from '@/components/message-button';
 import { ListingImageCarousel } from '@/components/listing-image-carousel';
 import { ListingStatusBadge } from '@/components/listing-status-badge';
@@ -40,6 +41,17 @@ export default async function ListingDetailPage({
   const currentUserId = user?.id ?? null;
   const isOwner = currentUserId === listing.user_id;
   const isSignedIn = Boolean(currentUserId);
+
+  let isAdmin = false;
+  if (user) {
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .maybeSingle();
+    isAdmin = userProfile?.is_admin ?? false;
+  }
+
   const status = listing.status ?? 'available';
   const tagClassName =
     listing.tag_class_name ?? getListingTagClassName(listing.item_type);
@@ -255,21 +267,43 @@ export default async function ListingDetailPage({
 
             <div className="mt-10 flex flex-col gap-4">
               {isOwner ? (
-                <div className="rounded-2xl border border-stone-light bg-cream-dark p-4">
-                  <p className="text-sm font-medium text-ink">
-                    You posted this item
-                  </p>
-                  <p className="mt-1 text-sm text-ink-3">
-                    Edit details, mark it claimed, or remove it from the feed.
-                  </p>
-                  <div className="mt-4">
-                    <MyListingActions listingId={listing.id} status={status} />
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-stone-light bg-cream-dark p-4">
+                    <p className="text-sm font-medium text-ink">
+                      You posted this item
+                    </p>
+                    <p className="mt-1 text-sm text-ink-3">
+                      Edit details, mark it claimed, or remove it from the feed.
+                    </p>
+                    <div className="mt-4">
+                      <MyListingActions listingId={listing.id} status={status} />
+                    </div>
                   </div>
+
+                  <OwnerClaimRequests
+                    listingId={listing.id}
+                    listingStatus={status}
+                  />
                 </div>
               ) : status === 'available' ? (
                 isSignedIn ? (
                   <div className="flex flex-col gap-3 w-full">
-                    <ClaimListingButton listingId={listing.id} />
+                    {isAdmin ? (
+                      <div className="rounded-2xl border border-stone-light bg-cream-dark p-4">
+                        <p className="text-sm font-medium text-ink">
+                          Admin Account Notice
+                        </p>
+                        <p className="mt-1 text-xs text-ink-3">
+                          Administrators are not permitted to claim student items. Please sign in as a student to claim listings.
+                        </p>
+                      </div>
+                    ) : (
+                      <ClaimRequestModal
+                        listingId={listing.id}
+                        listingTitle={listing.title ?? 'Listing'}
+                        ownerName={listing.owner_name ?? 'CampusShare user'}
+                      />
+                    )}
                     <MessageButton listingId={listing.id} variant="outline" />
                   </div>
                 ) : (

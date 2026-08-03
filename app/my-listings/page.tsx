@@ -1,3 +1,4 @@
+import { OwnerClaimRequests } from '@/components/owner-claim-requests';
 import { MyListingActions } from '@/components/my-listing-actions';
 import { ListingImage } from '@/components/listing-image';
 import { ListingStatusBadge } from '@/components/listing-status-badge';
@@ -97,10 +98,15 @@ export default async function MyListingsPage() {
                         <span>{item.time}</span>
                       </div>
 
-                      <div className="mt-5 border-t border-stone-light pt-5">
+                      <div className="mt-5 border-t border-stone-light pt-5 space-y-4">
                         <MyListingActions
                           listingId={item.id}
                           status={item.status}
+                        />
+
+                        <OwnerClaimRequests
+                          listingId={item.id}
+                          listingStatus={item.status}
                         />
                       </div>
                     </div>

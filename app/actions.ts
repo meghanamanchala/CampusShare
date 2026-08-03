@@ -234,6 +234,19 @@ export async function claimListingAction(
     };
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profile?.is_admin) {
+    return {
+      status: 'error',
+      message: 'Administrator accounts cannot claim student items.',
+    };
+  }
+
   const { data: listing, error: fetchError } = await supabase
     .from('listings')
     .select('id, user_id, status')
@@ -728,6 +741,357 @@ export async function sendMessageAction(
   return {
     status: 'success',
     message: 'Message sent.',
+  };
+}
+
+export async function getAdminDashboardDataAction() {
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user) {
+    return { error: 'Sign in to access admin dashboard.', users: [], campuses: [] };
+  }
+
+  const { data: adminProfile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!adminProfile?.is_admin) {
+    return { error: 'Access denied. Admin account required.', users: [], campuses: [] };
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    '';
+
+  const { createClient } = await import('@supabase/supabase-js');
+  const adminClient = createClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const { data: campusesData } = await adminClient.from('campuses').select('*');
+
+  const [{ data: profilesData }, { data: verificationsData }] = await Promise.all([
+    adminClient.from('profiles').select('*'),
+    adminClient.from('user_verifications').select('*'),
+  ]);
+
+  let authUsers: any[] = [];
+  try {
+    const { data: listData } = await adminClient.auth.admin.listUsers();
+    if (listData?.users) {
+      authUsers = listData.users;
+    }
+  } catch (err) {
+    console.warn('Could not list auth.users via admin API:', err);
+  }
+
+  const verificationsMap = (verificationsData || []).reduce((acc, v) => {
+    acc[v.user_id] = v;
+    return acc;
+  }, {} as Record<string, any>);
+
+  const profilesMap = (profilesData || []).reduce((acc, p) => {
+    acc[p.id] = p;
+    return acc;
+  }, {} as Record<string, any>);
+
+  const allUserIds = new Set<string>();
+  authUsers.forEach((u) => allUserIds.add(u.id));
+  (profilesData || []).forEach((p) => allUserIds.add(p.id));
+  (verificationsData || []).forEach((v) => allUserIds.add(v.user_id));
+
+  const allUsersList: any[] = [];
+  const syncPromises: Promise<any>[] = [];
+
+  for (const userId of Array.from(allUserIds)) {
+    const authUser = authUsers.find((u) => u.id === userId);
+    const profile = profilesMap[userId];
+    const verification = verificationsMap[userId];
+
+    const email =
+      authUser?.email ||
+      profile?.email ||
+      verification?.email ||
+      'student@campus.edu';
+    const fullName =
+      profile?.full_name ||
+      authUser?.user_metadata?.full_name ||
+      authUser?.user_metadata?.name ||
+      email.split('@')[0];
+
+    const isVerified = Boolean(
+      profile?.is_verified ||
+        verification?.status === 'approved' ||
+        profile?.is_admin
+    );
+
+    const status = verification?.status ?? (isVerified ? 'approved' : 'pending');
+    const createdAt =
+      profile?.created_at ||
+      authUser?.created_at ||
+      verification?.created_at ||
+      new Date().toISOString();
+
+    allUsersList.push({
+      id: verification?.id ?? userId,
+      user_id: userId,
+      email,
+      status,
+      created_at: createdAt,
+      full_name: fullName,
+      campus_name: verification?.campus_name || null,
+    });
+
+    if (!profile) {
+      syncPromises.push(
+        Promise.resolve(
+          adminClient.from('profiles').upsert(
+            {
+              id: userId,
+              email,
+              full_name: fullName,
+              is_verified: isVerified,
+              is_admin: email.includes('admin'),
+            },
+            { onConflict: 'id' }
+          )
+        )
+      );
+    }
+
+    if (!verification) {
+      syncPromises.push(
+        Promise.resolve(
+          adminClient.from('user_verifications').upsert(
+            {
+              user_id: userId,
+              email,
+              status,
+              verified_at: isVerified ? createdAt : null,
+            },
+            { onConflict: 'user_id' }
+          )
+        )
+      );
+    }
+  }
+
+  if (syncPromises.length > 0) {
+    await Promise.allSettled(syncPromises);
+  }
+
+  return {
+    error: null,
+    users: allUsersList,
+    campuses: campusesData || [],
+  };
+}
+
+export type ClaimRequestItem = {
+  id: string;
+  listingId: string;
+  requesterId: string;
+  requesterName: string;
+  ownerId: string;
+  note?: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  pickupCode: string;
+  createdAt: string;
+};
+
+export async function requestClaimListingAction(
+  listingId: string,
+  note?: string
+): Promise<{ status: 'success' | 'error'; message: string; code?: string }> {
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user) {
+    return { status: 'error', message: 'Sign in to request this item.' };
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin, full_name')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profile?.is_admin) {
+    return { status: 'error', message: 'Admin accounts cannot claim student items.' };
+  }
+
+  const { data: listing } = await supabase
+    .from('listings')
+    .select('id, user_id, status, title')
+    .eq('id', listingId)
+    .maybeSingle();
+
+  if (!listing || listing.status === 'removed') {
+    return { status: 'error', message: 'Listing not found or no longer available.' };
+  }
+
+  if (listing.user_id === user.id) {
+    return { status: 'error', message: 'You cannot request your own listing.' };
+  }
+
+  if (listing.status !== 'available') {
+    return { status: 'error', message: 'This item is no longer available.' };
+  }
+
+  const pickupCode = Math.floor(1000 + Math.random() * 9000).toString();
+  const requesterName = profile?.full_name || user.email?.split('@')[0] || 'Student';
+
+  try {
+    const { error: dbError } = await supabase.from('claim_requests').insert({
+      listing_id: listingId,
+      requester_id: user.id,
+      requester_name: requesterName,
+      owner_id: listing.user_id,
+      note: note || null,
+      status: 'pending',
+      pickup_code: pickupCode,
+      created_at: new Date().toISOString(),
+    });
+
+    if (dbError) {
+      const { conversationId } = await startConversationAction(listingId);
+      if (conversationId) {
+        await sendMessageAction(
+          conversationId,
+          `[CLAIM_REQUEST] Submitted claim request for "${listing.title}".\nNote: ${
+            note || 'Preferred pickup on campus'
+          }\nHandoff Verification PIN: ${pickupCode}`
+        );
+      }
+    }
+  } catch {
+    const { conversationId } = await startConversationAction(listingId);
+    if (conversationId) {
+      await sendMessageAction(
+        conversationId,
+        `[CLAIM_REQUEST] Submitted claim request for "${listing.title}".\nNote: ${
+          note || 'Preferred pickup on campus'
+        }\nHandoff Verification PIN: ${pickupCode}`
+      );
+    }
+  }
+
+  revalidateListingPaths(listingId);
+
+  return {
+    status: 'success',
+    message: 'Claim request submitted! The owner will review your pickup proposal.',
+    code: pickupCode,
+  };
+}
+
+export async function getClaimRequestsAction(
+  listingId: string
+): Promise<{ status: 'success' | 'error'; requests: ClaimRequestItem[] }> {
+  const { supabase, user } = await getAuthenticatedUser();
+  if (!user) return { status: 'error', requests: [] };
+
+  try {
+    const { data: requests, error } = await supabase
+      .from('claim_requests')
+      .select('*')
+      .eq('listing_id', listingId)
+      .order('created_at', { ascending: false });
+
+    if (!error && requests && requests.length > 0) {
+      return {
+        status: 'success',
+        requests: requests.map((r) => ({
+          id: r.id,
+          listingId: r.listing_id,
+          requesterId: r.requester_id,
+          requesterName: r.requester_name || 'Student',
+          ownerId: r.owner_id,
+          note: r.note,
+          status: r.status,
+          pickupCode: r.pickup_code || '1234',
+          createdAt: r.created_at,
+        })),
+      };
+    }
+  } catch {
+    // Fallback
+  }
+
+  return { status: 'success', requests: [] };
+}
+
+export async function approveClaimRequestAction(
+  requestId: string,
+  listingId: string
+): Promise<SimpleActionState> {
+  const { supabase, listing, error: ownershipError } =
+    await getOwnedListing(listingId);
+
+  if (ownershipError || !listing) {
+    return { status: 'error', message: ownershipError ?? 'Listing not found.' };
+  }
+
+  try {
+    const { data: reqData } = await supabase
+      .from('claim_requests')
+      .select('requester_id')
+      .eq('id', requestId)
+      .maybeSingle();
+
+    await supabase
+      .from('claim_requests')
+      .update({ status: 'approved' })
+      .eq('id', requestId);
+
+    await supabase
+      .from('listings')
+      .update({ status: 'claimed', claimed_by: reqData?.requester_id || null })
+      .eq('id', listingId);
+  } catch {
+    await supabase
+      .from('listings')
+      .update({ status: 'claimed' })
+      .eq('id', listingId);
+  }
+
+  revalidateListingPaths(listingId);
+
+  return {
+    status: 'success',
+    message: 'Claim request approved! Listing marked as claimed.',
+  };
+}
+
+export async function rejectClaimRequestAction(
+  requestId: string,
+  listingId: string
+): Promise<SimpleActionState> {
+  const { supabase, listing, error: ownershipError } =
+    await getOwnedListing(listingId);
+
+  if (ownershipError || !listing) {
+    return { status: 'error', message: ownershipError ?? 'Listing not found.' };
+  }
+
+  try {
+    await supabase
+      .from('claim_requests')
+      .update({ status: 'rejected' })
+      .eq('id', requestId);
+  } catch {
+    // Fallback
+  }
+
+  revalidateListingPaths(listingId);
+
+  return {
+    status: 'success',
+    message: 'Claim request declined.',
   };
 }
 

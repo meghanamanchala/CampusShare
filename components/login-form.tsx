@@ -117,12 +117,21 @@ export function LoginForm({ redirectTo = '/feed' }: LoginFormProps) {
         return;
       }
 
+      // Check if user is admin to determine redirect destination
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', authData.user.id)
+        .maybeSingle();
+
+      const destination = profileData?.is_admin ? '/admin/dashboard' : redirectTo;
+
       setStatus('success');
       setMessage('Sign in successful! Redirecting...');
 
       setTimeout(() => {
-        router.push('/feed');
-      }, 1000);
+        router.push(destination as any);
+      }, 800);
 
     } catch (error) {
       setStatus('error');

@@ -9,6 +9,7 @@ type Props = {
   actionHref?: string;
   actionLabel?: string;
   showMyListings?: boolean;
+  isAdmin?: boolean;
 };
 
 export default function SiteMobileMenu({
@@ -17,6 +18,7 @@ export default function SiteMobileMenu({
   actionHref,
   actionLabel,
   showMyListings,
+  isAdmin = false,
 }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -33,13 +35,20 @@ export default function SiteMobileMenu({
         <div className="absolute left-0 top-16 z-50 w-full">
           <div className="mx-4 rounded-3xl border border-stone-light bg-white p-4 shadow-soft">
             <nav className="flex flex-col gap-2">
-              {showMyListings && (
+              <a
+                href="/feed"
+                className="rounded-xl px-4 py-3 hover:bg-stone-light"
+              >
+                Browse Feed
+              </a>
+
+              {isAdmin ? (
                 <>
                   <a
-                    href="/messages"
-                    className="rounded-xl px-4 py-3 hover:bg-stone-light"
+                    href="/admin/dashboard"
+                    className="rounded-xl px-4 py-3 font-semibold text-accent hover:bg-stone-light"
                   >
-                    Messages
+                    Admin Dashboard
                   </a>
                   <a
                     href="/profile"
@@ -47,29 +56,41 @@ export default function SiteMobileMenu({
                   >
                     Profile
                   </a>
-                  <a
-                    href="/my-listings"
-                    className="rounded-xl px-4 py-3 hover:bg-stone-light"
-                  >
-                    My Listings
-                  </a>
                 </>
-              )}
+              ) : (
+                <>
+                  {showMyListings && (
+                    <>
+                      <a
+                        href="/my-listings"
+                        className="rounded-xl px-4 py-3 hover:bg-stone-light"
+                      >
+                        My Listings
+                      </a>
+                      <a
+                        href="/messages"
+                        className="rounded-xl px-4 py-3 hover:bg-stone-light"
+                      >
+                        Messages
+                      </a>
+                      <a
+                        href="/profile"
+                        className="rounded-xl px-4 py-3 hover:bg-stone-light"
+                      >
+                        Profile
+                      </a>
+                    </>
+                  )}
 
-              <a
-                href="/feed"
-                className="rounded-xl px-4 py-3 hover:bg-stone-light"
-              >
-                Browse
-              </a>
-
-              {actionHref && actionLabel && (
-                <a
-                  href={actionHref}
-                  className="rounded-xl bg-ink px-4 py-3 text-center text-cream"
-                >
-                  {actionLabel}
-                </a>
+                  {actionHref && actionLabel && (
+                    <a
+                      href={actionHref}
+                      className="rounded-xl bg-ink px-4 py-3 text-center text-cream"
+                    >
+                      {actionLabel}
+                    </a>
+                  )}
+                </>
               )}
 
               {backHref && (
