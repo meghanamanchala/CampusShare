@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar, Tag, User, Clock, Info, MapPin, MessageSquare, Coins } from 'lucide-react';
-import { ClaimListingButton } from '@/components/claim-listing-button';
+import { ClaimRequestModal } from '@/components/claim-request-modal';
+import { OwnerClaimRequests } from '@/components/owner-claim-requests';
 import { MessageButton } from '@/components/message-button';
 import { ListingImageCarousel } from '@/components/listing-image-carousel';
 import { ListingStatusBadge } from '@/components/listing-status-badge';
@@ -266,16 +267,23 @@ export default async function ListingDetailPage({
 
             <div className="mt-10 flex flex-col gap-4">
               {isOwner ? (
-                <div className="rounded-2xl border border-stone-light bg-cream-dark p-4">
-                  <p className="text-sm font-medium text-ink">
-                    You posted this item
-                  </p>
-                  <p className="mt-1 text-sm text-ink-3">
-                    Edit details, mark it claimed, or remove it from the feed.
-                  </p>
-                  <div className="mt-4">
-                    <MyListingActions listingId={listing.id} status={status} />
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-stone-light bg-cream-dark p-4">
+                    <p className="text-sm font-medium text-ink">
+                      You posted this item
+                    </p>
+                    <p className="mt-1 text-sm text-ink-3">
+                      Edit details, mark it claimed, or remove it from the feed.
+                    </p>
+                    <div className="mt-4">
+                      <MyListingActions listingId={listing.id} status={status} />
+                    </div>
                   </div>
+
+                  <OwnerClaimRequests
+                    listingId={listing.id}
+                    listingStatus={status}
+                  />
                 </div>
               ) : status === 'available' ? (
                 isSignedIn ? (
@@ -290,7 +298,11 @@ export default async function ListingDetailPage({
                         </p>
                       </div>
                     ) : (
-                      <ClaimListingButton listingId={listing.id} />
+                      <ClaimRequestModal
+                        listingId={listing.id}
+                        listingTitle={listing.title ?? 'Listing'}
+                        ownerName={listing.owner_name ?? 'CampusShare user'}
+                      />
                     )}
                     <MessageButton listingId={listing.id} variant="outline" />
                   </div>

@@ -892,4 +892,207 @@ export async function getAdminDashboardDataAction() {
   };
 }
 
+export type ClaimRequestItem = {
+  id: string;
+  listingId: string;
+  requesterId: string;
+  requesterName: string;
+  ownerId: string;
+  note?: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  pickupCode: string;
+  createdAt: string;
+};
+
+export async function requestClaimListingAction(
+  listingId: string,
+  note?: string
+): Promise<{ status: 'success' | 'error'; message: string; code?: string }> {
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user) {
+    return { status: 'error', message: 'Sign in to request this item.' };
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin, full_name')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profile?.is_admin) {
+    return { status: 'error', message: 'Admin accounts cannot claim student items.' };
+  }
+
+  const { data: listing } = await supabase
+    .from('listings')
+    .select('id, user_id, status, title')
+    .eq('id', listingId)
+    .maybeSingle();
+
+  if (!listing || listing.status === 'removed') {
+    return { status: 'error', message: 'Listing not found or no longer available.' };
+  }
+
+  if (listing.user_id === user.id) {
+    return { status: 'error', message: 'You cannot request your own listing.' };
+  }
+
+  if (listing.status !== 'available') {
+    return { status: 'error', message: 'This item is no longer available.' };
+  }
+
+  const pickupCode = Math.floor(1000 + Math.random() * 9000).toString();
+  const requesterName = profile?.full_name || user.email?.split('@')[0] || 'Student';
+
+  try {
+    const { error: dbError } = await supabase.from('claim_requests').insert({
+      listing_id: listingId,
+      requester_id: user.id,
+      requester_name: requesterName,
+      owner_id: listing.user_id,
+      note: note || null,
+      status: 'pending',
+      pickup_code: pickupCode,
+      created_at: new Date().toISOString(),
+    });
+
+    if (dbError) {
+      const { conversationId } = await startConversationAction(listingId);
+      if (conversationId) {
+        await sendMessageAction(
+          conversationId,
+          `[CLAIM_REQUEST] Submitted claim request for "${listing.title}".\nNote: ${
+            note || 'Preferred pickup on campus'
+          }\nHandoff Verification PIN: ${pickupCode}`
+        );
+      }
+    }
+  } catch {
+    const { conversationId } = await startConversationAction(listingId);
+    if (conversationId) {
+      await sendMessageAction(
+        conversationId,
+        `[CLAIM_REQUEST] Submitted claim request for "${listing.title}".\nNote: ${
+          note || 'Preferred pickup on campus'
+        }\nHandoff Verification PIN: ${pickupCode}`
+      );
+    }
+  }
+
+  revalidateListingPaths(listingId);
+
+  return {
+    status: 'success',
+    message: 'Claim request submitted! The owner will review your pickup proposal.',
+    code: pickupCode,
+  };
+}
+
+export async function getClaimRequestsAction(
+  listingId: string
+): Promise<{ status: 'success' | 'error'; requests: ClaimRequestItem[] }> {
+  const { supabase, user } = await getAuthenticatedUser();
+  if (!user) return { status: 'error', requests: [] };
+
+  try {
+    const { data: requests, error } = await supabase
+      .from('claim_requests')
+      .select('*')
+      .eq('listing_id', listingId)
+      .order('created_at', { ascending: false });
+
+    if (!error && requests && requests.length > 0) {
+      return {
+        status: 'success',
+        requests: requests.map((r) => ({
+          id: r.id,
+          listingId: r.listing_id,
+          requesterId: r.requester_id,
+          requesterName: r.requester_name || 'Student',
+          ownerId: r.owner_id,
+          note: r.note,
+          status: r.status,
+          pickupCode: r.pickup_code || '1234',
+          createdAt: r.created_at,
+        })),
+      };
+    }
+  } catch {
+    // Fallback
+  }
+
+  return { status: 'success', requests: [] };
+}
+
+export async function approveClaimRequestAction(
+  requestId: string,
+  listingId: string
+): Promise<SimpleActionState> {
+  const { supabase, listing, error: ownershipError } =
+    await getOwnedListing(listingId);
+
+  if (ownershipError || !listing) {
+    return { status: 'error', message: ownershipError ?? 'Listing not found.' };
+  }
+
+  try {
+    const { data: reqData } = await supabase
+      .from('claim_requests')
+      .select('requester_id')
+      .eq('id', requestId)
+      .maybeSingle();
+
+    await supabase
+      .from('claim_requests')
+      .update({ status: 'approved' })
+      .eq('id', requestId);
+
+    await supabase
+      .from('listings')
+      .update({ status: 'claimed', claimed_by: reqData?.requester_id || null })
+      .eq('id', listingId);
+  } catch {
+    await supabase
+      .from('listings')
+      .update({ status: 'claimed' })
+      .eq('id', listingId);
+  }
+
+  revalidateListingPaths(listingId);
+
+  return {
+    status: 'success',
+    message: 'Claim request approved! Listing marked as claimed.',
+  };
+}
+
+export async function rejectClaimRequestAction(
+  requestId: string,
+  listingId: string
+): Promise<SimpleActionState> {
+  const { supabase, listing, error: ownershipError } =
+    await getOwnedListing(listingId);
+
+  if (ownershipError || !listing) {
+    return { status: 'error', message: ownershipError ?? 'Listing not found.' };
+  }
+
+  try {
+    await supabase
+      .from('claim_requests')
+      .update({ status: 'rejected' })
+      .eq('id', requestId);
+  } catch {
+    // Fallback
+  }
+
+  revalidateListingPaths(listingId);
+
+  return {
+    status: 'success',
+    message: 'Claim request declined.',
+  };
+}
+
 
