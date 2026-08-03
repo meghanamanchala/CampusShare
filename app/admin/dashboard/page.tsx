@@ -2,8 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import {
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertCircle,
+  ShieldCheck,
+  Search,
+  Users,
+  Building2,
+  Sparkles,
+  UserCheck,
+  UserX,
+  RefreshCw,
+} from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { SiteHeader } from '@/components/site-header';
 
 type PendingUser = {
   id: string;
@@ -22,40 +36,39 @@ type Campus = {
 
 export default function AdminVerificationsPage() {
   const router = useRouter();
-  
+
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [approvedUsers, setApprovedUsers] = useState<PendingUser[]>([]);
   const [rejectedUsers, setRejectedUsers] = useState<PendingUser[]>([]);
   const [campuses, setCampuses] = useState<Campus[]>([]);
-  
+
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  
+
   const [selectedTab, setSelectedTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [selectedCampus, setSelectedCampus] = useState<Record<string, string>>({});
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  
-  // FIX: Add success message state
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdminAndFetchData();
   }, []);
 
-  // FIX: Auto-hide success message after 3 seconds
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => {
         setSuccessMessage(null);
-      }, 3000);
+      }, 3500);
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
 
   async function checkAdminAndFetchData() {
+    setLoading(true);
     const supabase = createSupabaseBrowserClient();
 
-    // Check if user is admin
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -79,20 +92,17 @@ export default function AdminVerificationsPage() {
 
     setIsAdmin(true);
 
-    // Fetch campuses
     const { data: campusesData } = await supabase.from('campuses').select('*');
     if (campusesData) {
       setCampuses(campusesData);
     }
 
-    // Fetch all verifications
     const { data: verificationsData } = await supabase
       .from('user_verifications')
       .select('*')
       .order('created_at', { ascending: false });
 
     if (verificationsData) {
-      // Fetch user details for each verification
       const userIds = verificationsData.map((v) => v.user_id);
 
       if (userIds.length > 0) {
@@ -111,12 +121,16 @@ export default function AdminVerificationsPage() {
 
         const enrichedData = verificationsData.map((v) => ({
           ...v,
-          full_name: profilesMap[v.user_id] || 'Unknown',
+          full_name: profilesMap[v.user_id] || 'Campus Student',
         }));
 
         setPendingUsers(enrichedData.filter((u) => u.status === 'pending'));
         setApprovedUsers(enrichedData.filter((u) => u.status === 'approved'));
         setRejectedUsers(enrichedData.filter((u) => u.status === 'rejected'));
+      } else {
+        setPendingUsers([]);
+        setApprovedUsers([]);
+        setRejectedUsers([]);
       }
     }
 
@@ -127,20 +141,16 @@ export default function AdminVerificationsPage() {
     const campusId = selectedCampus[userId];
 
     if (!campusId) {
-      alert('Please select a campus');
+      alert('Please select a campus to assign to this student');
       return;
     }
 
-    // FIX: Set loading state for THIS specific user only
     setActionLoading(userId);
 
     try {
       const supabase = createSupabaseBrowserClient();
-
-      // Get campus name
       const campus = campuses.find((c) => c.id === campusId);
 
-      // Update verification
       const { error: verificationError } = await supabase
         .from('user_verifications')
         .update({
@@ -153,7 +163,6 @@ export default function AdminVerificationsPage() {
 
       if (verificationError) throw verificationError;
 
-      // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -164,25 +173,21 @@ export default function AdminVerificationsPage() {
 
       if (profileError) throw profileError;
 
-      // FIX: Show success message
-      setSuccessMessage(`${email} has been approved successfully!`);
-      
-      // Refresh data
+      setSuccessMessage(`${email} verified and assigned to ${campus?.name || 'campus'}!`);
       await checkAdminAndFetchData();
-      setActionLoading(null);
     } catch (error) {
       console.error('Approval error:', error);
-      alert('Failed to approve user. Please try again.');
+      alert('Failed to approve user verification.');
+    } finally {
       setActionLoading(null);
     }
   }
 
-  async function handleReject(userId: string) {
-    if (!confirm('Are you sure you want to reject this user?')) {
+  async function handleReject(userId: string, email: string) {
+    if (!confirm(`Are you sure you want to reject verification for ${email}?`)) {
       return;
     }
 
-    // FIX: Set loading state for THIS specific user only
     setActionLoading(userId);
 
     try {
@@ -195,54 +200,68 @@ export default function AdminVerificationsPage() {
 
       if (error) throw error;
 
-      // FIX: Show success message
-      setSuccessMessage('User has been rejected successfully!');
-      
-      // Refresh data
+      setSuccessMessage(`Application for ${email} has been rejected.`);
       await checkAdminAndFetchData();
-      setActionLoading(null);
     } catch (error) {
       console.error('Rejection error:', error);
-      alert('Failed to reject user. Please try again.');
+      alert('Failed to reject user verification.');
+    } finally {
       setActionLoading(null);
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-spin" />
-          <p className="text-gray-600">Loading...</p>
+      <main className="min-h-screen bg-cream text-ink">
+        <SiteHeader showMyListings={true} />
+        <div className="flex flex-col items-center justify-center py-32">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-soft border border-stone-light">
+            <RefreshCw className="h-6 w-6 text-ink-3 animate-spin" />
+          </div>
+          <p className="mt-4 text-sm font-medium text-ink-2">Loading Admin Console...</p>
         </div>
-      </div>
+      </main>
     );
   }
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
-          <p className="text-gray-600 mb-6">Only admins can access this page.</p>
+      <main className="min-h-screen bg-cream text-ink">
+        <SiteHeader showMyListings={true} />
+        <div className="mx-auto max-w-md px-4 py-20 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-600 border border-red-200">
+            <AlertCircle className="h-8 w-8" />
+          </div>
+          <h1 className="mt-6 text-2xl font-bold text-ink">Access Restricted</h1>
+          <p className="mt-2 text-sm text-ink-3">
+            This portal is reserved strictly for verified campus network administrators.
+          </p>
           <button
             onClick={() => router.push('/feed')}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
+            className="mt-6 inline-flex rounded-xl bg-ink px-6 py-3 text-sm font-medium text-cream hover:bg-ink-2 transition shadow-sm"
           >
-            Go Home
+            Return to Feed
           </button>
         </div>
-      </div>
+      </main>
     );
   }
 
-  const currentUsers =
+  const rawUsers =
     selectedTab === 'pending'
       ? pendingUsers
       : selectedTab === 'approved'
       ? approvedUsers
       : rejectedUsers;
+
+  const currentUsers = rawUsers.filter((u) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      u.email.toLowerCase().includes(q) ||
+      (u.full_name && u.full_name.toLowerCase().includes(q))
+    );
+  });
 
   const stats = {
     pending: pendingUsers.length,
@@ -252,233 +271,327 @@ export default function AdminVerificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* FIX: Add Success Toast Notification */}
+    <main className="min-h-screen bg-cream text-ink">
+      <SiteHeader showMyListings={true} />
+
+      {/* Floating Success Toast */}
       {successMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-pulse">
-          {successMessage.includes('approved') ? (
-            <CheckCircle className="h-5 w-5" />
-          ) : (
-            <XCircle className="h-5 w-5" />
-          )}
-          <span className="font-medium">{successMessage}</span>
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl bg-ink px-5 py-3.5 text-sm font-medium text-cream shadow-xl border border-stone-light/20 transition-all duration-300 animate-in fade-in slide-in-from-bottom-5">
+          <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+          <span>{successMessage}</span>
         </div>
       )}
 
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-1">Manage user verifications</p>
-        </div>
-      </div>
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
+        {/* Banner Card */}
+        <div className="relative overflow-hidden rounded-[1.75rem] border border-stone-light bg-white p-6 sm:p-10 shadow-soft">
+          <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-accent/5 blur-3xl pointer-events-none" />
+          <div className="absolute -left-16 -bottom-16 h-56 w-56 rounded-full bg-green/5 blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-lg p-6 border border-gray-200">
-            <p className="text-gray-600 text-sm font-medium mb-2">Total Users</p>
-            <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
-          </div>
-          <div className="bg-white rounded-lg p-6 border border-yellow-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium mb-2">Pending</p>
-                <p className="text-3xl font-bold text-yellow-600">{stats.pending}</p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent mb-3">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>Admin Control Center</span>
               </div>
-              <Clock className="h-8 w-8 text-yellow-400" />
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">
+                Campus Identity Verifications
+              </h1>
+              <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-xl">
+                Review student account requests, assign university domain networks, and maintain a verified peer marketplace.
+              </p>
             </div>
-          </div>
-          <div className="bg-white rounded-lg p-6 border border-green-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium mb-2">Approved</p>
-                <p className="text-3xl font-bold text-green-600">{stats.approved}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-400" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-6 border border-red-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium mb-2">Rejected</p>
-                <p className="text-3xl font-bold text-red-600">{stats.rejected}</p>
-              </div>
-              <XCircle className="h-8 w-8 text-red-400" />
-            </div>
+
+            <button
+              onClick={checkAdminAndFetchData}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone bg-cream px-4 py-2.5 text-xs font-semibold text-ink-2 hover:bg-stone-light hover:text-ink transition shrink-0 self-start md:self-auto"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Refresh Console
+            </button>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-lg border border-gray-200 mb-6">
-          <div className="flex">
+        {/* Analytics Stats Grid */}
+        <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Total Users */}
+          <div
+            onClick={() => setSelectedTab('approved')}
+            className="cursor-pointer group rounded-2xl border border-stone-light bg-white p-5 transition hover:border-stone hover:shadow-soft"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-ink-3">
+                Total Requests
+              </span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-stone-light text-ink-2 group-hover:scale-105 transition">
+                <Users className="h-4.5 w-4.5" />
+              </span>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-ink">{stats.total}</p>
+            <p className="mt-1 text-xs text-ink-3">All registrations</p>
+          </div>
+
+          {/* Pending */}
+          <div
+            onClick={() => setSelectedTab('pending')}
+            className={`cursor-pointer group rounded-2xl border p-5 transition hover:shadow-soft ${
+              selectedTab === 'pending'
+                ? 'border-amber-400 bg-amber-50/40'
+                : 'border-stone-light bg-white hover:border-amber-300'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-amber-700">
+                Pending Review
+              </span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-700 group-hover:scale-105 transition">
+                <Clock className="h-4.5 w-4.5" />
+              </span>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-amber-800">{stats.pending}</p>
+            <p className="mt-1 text-xs text-amber-700 font-medium">Awaiting action</p>
+          </div>
+
+          {/* Approved */}
+          <div
+            onClick={() => setSelectedTab('approved')}
+            className={`cursor-pointer group rounded-2xl border p-5 transition hover:shadow-soft ${
+              selectedTab === 'approved'
+                ? 'border-green/40 bg-green-light/50'
+                : 'border-stone-light bg-white hover:border-green/30'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-green-700">
+                Approved
+              </span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-light text-green-700 group-hover:scale-105 transition">
+                <UserCheck className="h-4.5 w-4.5" />
+              </span>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-green-800">{stats.approved}</p>
+            <p className="mt-1 text-xs text-green-700 font-medium">Verified peers</p>
+          </div>
+
+          {/* Rejected */}
+          <div
+            onClick={() => setSelectedTab('rejected')}
+            className={`cursor-pointer group rounded-2xl border p-5 transition hover:shadow-soft ${
+              selectedTab === 'rejected'
+                ? 'border-red-300 bg-red-50/50'
+                : 'border-stone-light bg-white hover:border-red-200'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-red-700">
+                Rejected
+              </span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-100 text-red-700 group-hover:scale-105 transition">
+                <UserX className="h-4.5 w-4.5" />
+              </span>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-red-800">{stats.rejected}</p>
+            <p className="mt-1 text-xs text-red-700 font-medium">Declined users</p>
+          </div>
+        </div>
+
+        {/* Filter & Search Bar */}
+        <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          {/* Tabs */}
+          <div className="flex rounded-2xl border border-stone-light bg-white p-1.5 shadow-2xs overflow-x-auto">
             <button
               onClick={() => setSelectedTab('pending')}
-              className={`flex-1 py-4 px-6 font-medium border-b-2 transition ${
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition whitespace-nowrap ${
                 selectedTab === 'pending'
-                  ? 'border-black text-black'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'bg-ink text-cream shadow-2xs'
+                  : 'text-ink-2 hover:bg-stone-light hover:text-ink'
               }`}
             >
-              <Clock className="h-4 w-4 inline mr-2" />
-              Pending ({stats.pending})
+              <Clock className="h-3.5 w-3.5" />
+              Pending Review ({stats.pending})
             </button>
             <button
               onClick={() => setSelectedTab('approved')}
-              className={`flex-1 py-4 px-6 font-medium border-b-2 transition ${
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition whitespace-nowrap ${
                 selectedTab === 'approved'
-                  ? 'border-black text-black'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'bg-ink text-cream shadow-2xs'
+                  : 'text-ink-2 hover:bg-stone-light hover:text-ink'
               }`}
             >
-              <CheckCircle className="h-4 w-4 inline mr-2" />
+              <UserCheck className="h-3.5 w-3.5" />
               Approved ({stats.approved})
             </button>
             <button
               onClick={() => setSelectedTab('rejected')}
-              className={`flex-1 py-4 px-6 font-medium border-b-2 transition ${
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition whitespace-nowrap ${
                 selectedTab === 'rejected'
-                  ? 'border-black text-black'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'bg-ink text-cream shadow-2xs'
+                  : 'text-ink-2 hover:bg-stone-light hover:text-ink'
               }`}
             >
-              <XCircle className="h-4 w-4 inline mr-2" />
+              <UserX className="h-3.5 w-3.5" />
               Rejected ({stats.rejected})
             </button>
           </div>
+
+          {/* Search Bar */}
+          <div className="relative flex-1 sm:max-w-xs">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-3" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search user name or email..."
+              className="w-full rounded-2xl border border-stone-light bg-white pl-10 pr-4 py-2.5 text-xs text-ink placeholder:text-ink-3/70 focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink transition"
+            />
+          </div>
         </div>
 
-        {/* User List */}
-        <div className="space-y-4">
+        {/* Verification Cards Feed */}
+        <div className="mt-6 space-y-4">
           {currentUsers.length === 0 ? (
-            <div className="bg-white rounded-lg p-12 text-center border border-gray-200">
-              <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No {selectedTab} users</p>
+            <div className="rounded-[1.75rem] border border-dashed border-stone-light bg-white p-12 text-center shadow-soft">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-light/60 text-ink-3 mb-3">
+                <Sparkles className="h-6 w-6" />
+              </div>
+              <h3 className="text-base font-semibold text-ink">
+                No {selectedTab} applications found
+              </h3>
+              <p className="mt-1 text-xs text-ink-3 max-w-sm mx-auto">
+                {searchQuery
+                  ? `No applications match your search for "${searchQuery}".`
+                  : selectedTab === 'pending'
+                  ? 'All pending student signup requests have been reviewed.'
+                  : `There are currently no ${selectedTab} verification records.`}
+              </p>
             </div>
           ) : (
-            currentUsers.map((user) => (
-              <div
-                key={user.id}
-                className="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      {user.full_name || 'Unknown'}
-                    </h3>
-                    <p className="text-sm text-gray-600">{user.email}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Signed up: {new Date(user.created_at).toLocaleDateString()}
-                    </p>
+            currentUsers.map((user) => {
+              const initials = (user.full_name || user.email)
+                .split('@')[0]
+                .slice(0, 2)
+                .toUpperCase();
+
+              const formattedDate = new Date(user.created_at).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              });
+
+              return (
+                <div
+                  key={user.id}
+                  className="group rounded-[1.5rem] border border-stone-light bg-white p-5 sm:p-6 transition hover:border-stone hover:shadow-soft"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                    {/* User Profile Summary */}
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-accent to-accent/80 text-sm font-bold text-cream shadow-2xs">
+                        {initials}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-semibold text-base text-ink truncate">
+                            {user.full_name || 'Campus Student'}
+                          </h3>
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                              user.status === 'pending'
+                                ? 'bg-amber-100 text-amber-800'
+                                : user.status === 'approved'
+                                ? 'bg-green-light text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
+                          >
+                            {user.status}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-ink-3 truncate mt-0.5">{user.email}</p>
+                        <p className="text-[11px] text-ink-3/80 mt-1">
+                          Applied: {formattedDate}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Actions & Campus Selector for Pending */}
+                    {selectedTab === 'pending' && (
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border-t md:border-t-0 border-stone-light pt-4 md:pt-0">
+                        <div className="relative min-w-[200px]">
+                          <select
+                            value={selectedCampus[user.user_id] || ''}
+                            onChange={(e) =>
+                              setSelectedCampus((prev) => ({
+                                ...prev,
+                                [user.user_id]: e.target.value,
+                              }))
+                            }
+                            disabled={actionLoading === user.user_id}
+                            className="w-full rounded-xl border border-stone bg-cream px-3 py-2.5 text-xs font-medium text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink transition disabled:opacity-50"
+                          >
+                            <option value="">Assign Campus...</option>
+                            {campuses.map((campus) => (
+                              <option key={campus.id} value={campus.id}>
+                                {campus.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleApprove(user.user_id, user.email)}
+                            disabled={
+                              actionLoading === user.user_id ||
+                              !selectedCampus[user.user_id]
+                            }
+                            className="inline-flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl bg-green-700 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50 shadow-2xs"
+                          >
+                            {actionLoading === user.user_id ? (
+                              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                            )}
+                            Approve
+                          </button>
+
+                          <button
+                            onClick={() => handleReject(user.user_id, user.email)}
+                            disabled={actionLoading === user.user_id}
+                            className="inline-flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {actionLoading === user.user_id ? (
+                              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <XCircle className="h-3.5 w-3.5" />
+                            )}
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedTab === 'approved' && (
+                      <div className="flex items-center gap-2 text-xs text-green-700 font-medium bg-green-light/40 px-3.5 py-2 rounded-xl border border-green/20">
+                        <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                        <span>Verified Campus Peer</span>
+                      </div>
+                    )}
+
+                    {selectedTab === 'rejected' && (
+                      <div className="flex items-center gap-2 text-xs text-red-700 font-medium bg-red-50 px-3.5 py-2 rounded-xl border border-red-200">
+                        <XCircle className="h-4 w-4 text-red-600 shrink-0" />
+                        <span>Verification Declined</span>
+                      </div>
+                    )}
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                      user.status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : user.status === 'approved'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-                  </span>
                 </div>
-
-                {/* Actions */}
-                {selectedTab === 'pending' && (
-                  <>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Assign Campus:
-                      </label>
-                      <select
-                        value={selectedCampus[user.user_id] || ''}
-                        onChange={(e) =>
-                          setSelectedCampus((prev) => ({
-                            ...prev,
-                            [user.user_id]: e.target.value,
-                          }))
-                        }
-                        disabled={actionLoading === user.user_id}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      >
-                        <option value="">Select a campus...</option>
-                        {campuses.map((campus) => (
-                          <option key={campus.id} value={campus.id}>
-                            {campus.name} ({campus.domain})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Button Container - FIXED: Proper loading state per button */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <button
-                        onClick={() => handleApprove(user.user_id, user.email)}
-                        disabled={
-                          actionLoading === user.user_id ||
-                          !selectedCampus[user.user_id]
-                        }
-                        style={{
-                          padding: '8px 16px',
-                          borderRadius: '8px',
-                          fontWeight: '500',
-                          border: 'none',
-                          cursor: actionLoading === user.user_id || !selectedCampus[user.user_id] ? 'not-allowed' : 'pointer',
-                          backgroundColor:
-                            actionLoading === user.user_id || !selectedCampus[user.user_id]
-                              ? '#d1d5db'
-                              : '#16a34a',
-                          color:
-                            actionLoading === user.user_id || !selectedCampus[user.user_id]
-                              ? '#374151'
-                              : 'white',
-                          transition: 'all 0.2s',
-                        }}
-                      >
-                        {actionLoading === user.user_id ? 'Approving...' : 'Approve'}
-                      </button>
-                      <button
-                        onClick={() => handleReject(user.user_id)}
-                        disabled={actionLoading === user.user_id}
-                        style={{
-                          padding: '8px 16px',
-                          borderRadius: '8px',
-                          fontWeight: '500',
-                          border: 'none',
-                          cursor: actionLoading === user.user_id ? 'not-allowed' : 'pointer',
-                          backgroundColor:
-                            actionLoading === user.user_id ? '#d1d5db' : '#dc2626',
-                          color:
-                            actionLoading === user.user_id ? '#374151' : 'white',
-                          transition: 'all 0.2s',
-                        }}
-                      >
-                        {/* FIX: Only show loading when THIS user is being rejected */}
-                        {actionLoading === user.user_id && selectedTab === 'pending' ? 'Rejecting...' : 'Reject'}
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {selectedTab === 'approved' && (
-                  <div className="pt-4 border-t border-gray-200 flex items-center gap-2 text-sm text-green-700">
-                    <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
-                    <span>User has been approved and can now sign in.</span>
-                  </div>
-                )}
-
-                {selectedTab === 'rejected' && (
-                  <div className="pt-4 border-t border-gray-200 flex items-center gap-2 text-sm text-red-700">
-                    <XCircle className="h-4 w-4 text-red-600 shrink-0" />
-                    <span>User signup has been rejected.</span>
-                  </div>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

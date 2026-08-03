@@ -80,48 +80,56 @@ export function SiteHeader({
             showMyListings={showMyListings}
             actionHref={defaultActionHref}
             actionLabel={defaultActionLabel}
+            isAdmin={isAdmin}
           />
         </div>
 
-        {/* Desktop Menu - Consistent Across All Pages */}
+        {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-1">
           <a href="/feed" className={navLinkClass('/feed')}>
             Browse Feed
           </a>
 
-          {showMyListings && (
+          {isAdmin ? (
             <>
-              <a href="/my-listings" className={navLinkClass('/my-listings')}>
-                My Listings
-              </a>
-              <a href="/messages" className={navLinkClass('/messages')}>
-                Messages
+              <a
+                href="/admin/dashboard"
+                className={cn(
+                  navLinkClass('/admin'),
+                  'inline-flex items-center gap-1.5 font-semibold text-accent'
+                )}
+              >
+                <Shield className="h-4 w-4" />
+                Admin Dashboard
               </a>
               <a href="/profile" className={navLinkClass('/profile')}>
                 Profile
               </a>
             </>
-          )}
-
-          {isAdmin && (
-            <a
-              href="/admin/dashboard"
-              className={cn(
-                navLinkClass('/admin'),
-                'inline-flex items-center gap-1.5 text-accent font-semibold'
+          ) : (
+            <>
+              {showMyListings && (
+                <>
+                  <a href="/my-listings" className={navLinkClass('/my-listings')}>
+                    My Listings
+                  </a>
+                  <a href="/messages" className={navLinkClass('/messages')}>
+                    Messages
+                  </a>
+                  <a href="/profile" className={navLinkClass('/profile')}>
+                    Profile
+                  </a>
+                </>
               )}
-            >
-              <Shield className="h-4 w-4" />
-              Admin Dashboard
-            </a>
-          )}
 
-          <a
-            href={defaultActionHref}
-            className="ml-2 rounded-xl bg-ink px-4 py-2 text-sm font-medium text-cream shadow-2xs transition hover:bg-ink-2"
-          >
-            {defaultActionLabel}
-          </a>
+              <a
+                href={defaultActionHref}
+                className="ml-2 rounded-xl bg-ink px-4 py-2 text-sm font-medium text-cream shadow-2xs transition hover:bg-ink-2"
+              >
+                {defaultActionLabel}
+              </a>
+            </>
+          )}
         </div>
       </div>
     </header>
