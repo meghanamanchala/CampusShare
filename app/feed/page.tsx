@@ -17,6 +17,28 @@ type FeedPageProps = {
   }>;
 };
 
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  textbook: ['textbook', 'textbooks', 'book', 'books', 'notes', 'notebook', 'study', 'course', 'guide', 'material', 'syllabus'],
+  textbooks: ['textbook', 'textbooks', 'book', 'books', 'notes', 'notebook', 'study', 'course', 'guide'],
+  notes: ['notes', 'notebook', 'textbook', 'textbooks', 'book', 'books', 'study', 'lecture', 'material', 'pdf'],
+  book: ['book', 'books', 'textbook', 'textbooks', 'notes', 'notebook', 'study', 'guide'],
+  books: ['book', 'books', 'textbook', 'textbooks', 'notes', 'notebook', 'study', 'guide'],
+  calculator: ['calculator', 'casio', 'calc', 'scientific', 'fx'],
+  casio: ['casio', 'calculator', 'calc'],
+  charger: ['charger', 'charging', 'adapter', 'power', 'cable'],
+  mouse: ['mouse', 'mousepad', 'mouse pad'],
+  chair: ['chair', 'seat', 'seating', 'stool', 'armchair'],
+  table: ['table', 'desk', 'bench'],
+  dorm: ['dorm', 'bed', 'lamp', 'pillow', 'shelf', 'furniture', 'mattress'],
+  desk: ['desk', 'table', 'chair', 'furniture', 'dorm'],
+  bike: ['bike', 'bicycle', 'cycle', 'scooter'],
+  cycle: ['cycle', 'bike', 'bicycle', 'scooter'],
+  scooter: ['scooter', 'bike', 'cycle'],
+  sports: ['sports', 'fitness', 'gym', 'racket', 'ball', 'dumbbell', 'weights'],
+  fitness: ['fitness', 'gym', 'sports', 'dumbbell', 'weights'],
+  gym: ['gym', 'fitness', 'sports', 'dumbbell', 'weights'],
+};
+
 export default async function FeedPage({ searchParams }: FeedPageProps) {
   const { type, q, status, sort } = await searchParams;
   const activeFilter = type ?? 'all';
@@ -43,11 +65,24 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
     query = query.eq('item_type', itemType);
   }
 
+  let rawTerms: string[] = [];
   if (searchQuery) {
-    const searchTerms = searchQuery
+    rawTerms = searchQuery
+      .toLowerCase()
       .split(/[\s,|]+/)
       .map((t) => t.trim())
       .filter((t) => t.length > 0);
+
+    const expandedTermsSet = new Set<string>();
+    rawTerms.forEach((term) => {
+      expandedTermsSet.add(term);
+      const synonyms = SEARCH_SYNONYMS[term];
+      if (synonyms) {
+        synonyms.forEach((syn) => expandedTermsSet.add(syn));
+      }
+    });
+
+    const searchTerms = Array.from(expandedTermsSet);
 
     if (searchTerms.length > 0) {
       const orConditions = searchTerms.flatMap((term) => [
@@ -71,11 +106,26 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
   const { data: listingsData, error: listingsError } = await query;
   let feedItems = listingsData?.map(mapListingRow) ?? [];
 
-  // Refine textbook/notes search so tech items like chargers don't falsely match "Mac Book"
-  if (searchQuery && (searchQuery.toLowerCase().includes('textbook') || searchQuery.toLowerCase().includes('notes'))) {
-    feedItems = feedItems.filter(
-      (item) => !item.title.toLowerCase().includes('charger') && !item.title.toLowerCase().includes('mouse')
+  // Filter out tech/hardware items (e.g., chargers matching "Mac Book") when searching specifically for books/textbooks/notes
+  if (rawTerms.length > 0) {
+    const isBookSearch = rawTerms.some((t) =>
+      ['textbook', 'textbooks', 'notes', 'book', 'books', 'study'].includes(t)
     );
+    const isExplicitTechSearch = rawTerms.some((t) =>
+      ['charger', 'laptop', 'macbook', 'phone', 'mouse', 'adapter', 'hardware'].includes(t)
+    );
+
+    if (isBookSearch && !isExplicitTechSearch) {
+      feedItems = feedItems.filter((item) => {
+        const titleLower = item.title.toLowerCase();
+        const isTechItem =
+          titleLower.includes('charger') ||
+          titleLower.includes('mouse') ||
+          titleLower.includes('laptop') ||
+          titleLower.includes('adapter');
+        return !isTechItem;
+      });
+    }
   }
   const isSignedIn = Boolean(user);
 
