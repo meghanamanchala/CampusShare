@@ -40,6 +40,17 @@ export default async function ListingDetailPage({
   const currentUserId = user?.id ?? null;
   const isOwner = currentUserId === listing.user_id;
   const isSignedIn = Boolean(currentUserId);
+
+  let isAdmin = false;
+  if (user) {
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .maybeSingle();
+    isAdmin = userProfile?.is_admin ?? false;
+  }
+
   const status = listing.status ?? 'available';
   const tagClassName =
     listing.tag_class_name ?? getListingTagClassName(listing.item_type);
@@ -269,7 +280,18 @@ export default async function ListingDetailPage({
               ) : status === 'available' ? (
                 isSignedIn ? (
                   <div className="flex flex-col gap-3 w-full">
-                    <ClaimListingButton listingId={listing.id} />
+                    {isAdmin ? (
+                      <div className="rounded-2xl border border-stone-light bg-cream-dark p-4">
+                        <p className="text-sm font-medium text-ink">
+                          Admin Account Notice
+                        </p>
+                        <p className="mt-1 text-xs text-ink-3">
+                          Administrators are not permitted to claim student items. Please sign in as a student to claim listings.
+                        </p>
+                      </div>
+                    ) : (
+                      <ClaimListingButton listingId={listing.id} />
+                    )}
                     <MessageButton listingId={listing.id} variant="outline" />
                   </div>
                 ) : (
