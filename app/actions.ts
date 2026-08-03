@@ -744,4 +744,152 @@ export async function sendMessageAction(
   };
 }
 
+export async function getAdminDashboardDataAction() {
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user) {
+    return { error: 'Sign in to access admin dashboard.', users: [], campuses: [] };
+  }
+
+  const { data: adminProfile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!adminProfile?.is_admin) {
+    return { error: 'Access denied. Admin account required.', users: [], campuses: [] };
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    '';
+
+  const { createClient } = await import('@supabase/supabase-js');
+  const adminClient = createClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const { data: campusesData } = await adminClient.from('campuses').select('*');
+
+  const [{ data: profilesData }, { data: verificationsData }] = await Promise.all([
+    adminClient.from('profiles').select('*'),
+    adminClient.from('user_verifications').select('*'),
+  ]);
+
+  let authUsers: any[] = [];
+  try {
+    const { data: listData } = await adminClient.auth.admin.listUsers();
+    if (listData?.users) {
+      authUsers = listData.users;
+    }
+  } catch (err) {
+    console.warn('Could not list auth.users via admin API:', err);
+  }
+
+  const verificationsMap = (verificationsData || []).reduce((acc, v) => {
+    acc[v.user_id] = v;
+    return acc;
+  }, {} as Record<string, any>);
+
+  const profilesMap = (profilesData || []).reduce((acc, p) => {
+    acc[p.id] = p;
+    return acc;
+  }, {} as Record<string, any>);
+
+  const allUserIds = new Set<string>();
+  authUsers.forEach((u) => allUserIds.add(u.id));
+  (profilesData || []).forEach((p) => allUserIds.add(p.id));
+  (verificationsData || []).forEach((v) => allUserIds.add(v.user_id));
+
+  const allUsersList: any[] = [];
+  const syncPromises: Promise<any>[] = [];
+
+  for (const userId of Array.from(allUserIds)) {
+    const authUser = authUsers.find((u) => u.id === userId);
+    const profile = profilesMap[userId];
+    const verification = verificationsMap[userId];
+
+    const email =
+      authUser?.email ||
+      profile?.email ||
+      verification?.email ||
+      'student@campus.edu';
+    const fullName =
+      profile?.full_name ||
+      authUser?.user_metadata?.full_name ||
+      authUser?.user_metadata?.name ||
+      email.split('@')[0];
+
+    const isVerified = Boolean(
+      profile?.is_verified ||
+        verification?.status === 'approved' ||
+        profile?.is_admin
+    );
+
+    const status = verification?.status ?? (isVerified ? 'approved' : 'pending');
+    const createdAt =
+      profile?.created_at ||
+      authUser?.created_at ||
+      verification?.created_at ||
+      new Date().toISOString();
+
+    allUsersList.push({
+      id: verification?.id ?? userId,
+      user_id: userId,
+      email,
+      status,
+      created_at: createdAt,
+      full_name: fullName,
+      campus_name: verification?.campus_name || null,
+    });
+
+    if (!profile) {
+      syncPromises.push(
+        Promise.resolve(
+          adminClient.from('profiles').upsert(
+            {
+              id: userId,
+              email,
+              full_name: fullName,
+              is_verified: isVerified,
+              is_admin: email.includes('admin'),
+            },
+            { onConflict: 'id' }
+          )
+        )
+      );
+    }
+
+    if (!verification) {
+      syncPromises.push(
+        Promise.resolve(
+          adminClient.from('user_verifications').upsert(
+            {
+              user_id: userId,
+              email,
+              status,
+              verified_at: isVerified ? createdAt : null,
+            },
+            { onConflict: 'user_id' }
+          )
+        )
+      );
+    }
+  }
+
+  if (syncPromises.length > 0) {
+    await Promise.allSettled(syncPromises);
+  }
+
+  return {
+    error: null,
+    users: allUsersList,
+    campuses: campusesData || [],
+  };
+}
+
 

@@ -17,6 +17,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { getAdminDashboardDataAction } from '@/app/actions';
 import { SiteHeader } from '@/components/site-header';
 
 type PendingUser = {
@@ -67,74 +68,30 @@ export default function AdminVerificationsPage() {
 
   async function checkAdminAndFetchData() {
     setLoading(true);
-    const supabase = createSupabaseBrowserClient();
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const result = await getAdminDashboardDataAction();
 
-    if (!user) {
-      router.push('/auth/login');
-      return;
-    }
-
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single();
-
-    if (!profileData?.is_admin) {
-      setLoading(false);
-      setIsAdmin(false);
-      return;
-    }
-
-    setIsAdmin(true);
-
-    const { data: campusesData } = await supabase.from('campuses').select('*');
-    if (campusesData) {
-      setCampuses(campusesData);
-    }
-
-    const { data: verificationsData } = await supabase
-      .from('user_verifications')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (verificationsData) {
-      const userIds = verificationsData.map((v) => v.user_id);
-
-      if (userIds.length > 0) {
-        const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .in('id', userIds);
-
-        const profilesMap = (profilesData || []).reduce(
-          (acc, p) => {
-            acc[p.id] = p.full_name;
-            return acc;
-          },
-          {} as Record<string, string>
-        );
-
-        const enrichedData = verificationsData.map((v) => ({
-          ...v,
-          full_name: profilesMap[v.user_id] || 'Campus Student',
-        }));
-
-        setPendingUsers(enrichedData.filter((u) => u.status === 'pending'));
-        setApprovedUsers(enrichedData.filter((u) => u.status === 'approved'));
-        setRejectedUsers(enrichedData.filter((u) => u.status === 'rejected'));
-      } else {
-        setPendingUsers([]);
-        setApprovedUsers([]);
-        setRejectedUsers([]);
+      if (result.error) {
+        if (result.error.includes('Sign in') || result.error.includes('Access denied')) {
+          setIsAdmin(false);
+          setLoading(false);
+          return;
+        }
       }
-    }
 
-    setLoading(false);
+      setIsAdmin(true);
+      setCampuses(result.campuses || []);
+
+      const allUsers: PendingUser[] = result.users || [];
+      setPendingUsers(allUsers.filter((u) => u.status === 'pending'));
+      setApprovedUsers(allUsers.filter((u) => u.status === 'approved'));
+      setRejectedUsers(allUsers.filter((u) => u.status === 'rejected'));
+    } catch (err) {
+      console.error('Error fetching admin dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleApprove(userId: string, email: string) {
@@ -153,13 +110,17 @@ export default function AdminVerificationsPage() {
 
       const { error: verificationError } = await supabase
         .from('user_verifications')
-        .update({
-          status: 'approved',
-          campus_id: campusId,
-          campus_name: campus?.name,
-          verified_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId);
+        .upsert(
+          {
+            user_id: userId,
+            email,
+            status: 'approved',
+            campus_id: campusId,
+            campus_name: campus?.name,
+            verified_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
 
       if (verificationError) throw verificationError;
 
@@ -195,8 +156,14 @@ export default function AdminVerificationsPage() {
 
       const { error } = await supabase
         .from('user_verifications')
-        .update({ status: 'rejected' })
-        .eq('user_id', userId);
+        .upsert(
+          {
+            user_id: userId,
+            email,
+            status: 'rejected',
+          },
+          { onConflict: 'user_id' }
+        );
 
       if (error) throw error;
 
