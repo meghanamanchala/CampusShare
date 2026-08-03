@@ -234,6 +234,19 @@ export async function claimListingAction(
     };
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profile?.is_admin) {
+    return {
+      status: 'error',
+      message: 'Administrator accounts cannot claim student items.',
+    };
+  }
+
   const { data: listing, error: fetchError } = await supabase
     .from('listings')
     .select('id, user_id, status')
