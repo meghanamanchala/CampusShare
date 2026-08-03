@@ -121,6 +121,18 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                 </span>
               )}
             </div>
+
+            {profile.is_admin && (
+              <div className="pt-2">
+                <a
+                  href="/admin/dashboard"
+                  className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-cream transition hover:bg-ink-2"
+                >
+                  <Shield className="h-4 w-4 text-accent" />
+                  Open Admin Dashboard
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>
